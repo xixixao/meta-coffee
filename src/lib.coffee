@@ -43,15 +43,19 @@ define ->
     printOnto this, ws
     ws.contents()
 
-  # delegation
+  # delegation - switched for subclassing
   objectThatDelegatesTo = (x, props) ->
-    f = ( -> )
-    f.prototype = x
-    r = new f()
-    for p of props
-      if props.hasOwnProperty p
-        r[p] = props[p]
-    return r  
+#    f = ( -> )
+#    f.prototype = x
+#    r = new f()
+#    for p of props
+#      if props.hasOwnProperty p
+#        r[p] = props[p]
+#    return r  
+    sub = class extends x
+    for key, val of props
+      sub.prototype[key] = val
+    sub
 
   # some reflective stuff
   ownPropertyNames = (x) ->
@@ -123,7 +127,7 @@ define ->
     else
       return "\\u" + padStringWith charCode.toString(16), "0", 4
 
-  unescape(s) ->
+  unescape = (s) ->
     if s.charAt(0) == '\\'
       switch s.charAt 1
         when "'"  then "'"
@@ -155,6 +159,6 @@ define ->
 
   escapeChar:       escapeChar
   unescape:         unescape
-  extendWith:       objectThatDelegatesTo  #shouldnt be used, use inheritence instead
   propertyNames:    ownPropertyNames
   programString:    toProgramString
+  subclass:         objectThatDelegatesTo

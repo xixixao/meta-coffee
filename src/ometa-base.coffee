@@ -63,9 +63,6 @@ define ->
           if x.hasOwnProperty "_id_" then x._id_ 
           else                            x._id_ = "R" + numIdx++
 
-  # failure exception
-  fail = toString: -> "match failed"
-
   # streams and memoization
   class OMInputStream
     constructor: (@hd, @tl) ->
@@ -86,8 +83,8 @@ define ->
   class OMInputStreamEnd extends OMInputStream
     constructor: (@lst, @idx) ->
       @memo = {}
-    head: -> throw fail
-    tail: -> throw fail
+    head: -> throw @fail
+    tail: -> throw @fail
 
 
   class ListOMInputStream extends OMInputStream
@@ -119,6 +116,11 @@ define ->
 
   # the OMeta "class" and basic functionality
   class OMeta
+
+    # shared by static and instance methods
+    # failure exception
+    @fail: toString: -> "match failed"    
+
     # input is OMListInputStream
     constructor: (@input) ->
 
@@ -140,45 +142,41 @@ define ->
               @input = origInput
               ans = this[rule].call(this)
               if @input == sentinel
-                throw fail
+                throw @fail
               memoRec.ans       = ans
               memoRec.nextInput = @input          
             catch f
-              if f != fail
+              if f != @fail
                 throw f
               break                  
       else if memoRec instanceof Failer
         memoRec.used = true
-        throw fail    
+        throw @fail    
       this.input = memoRec.nextInput
       return memoRec.ans  
 
     # note: _applyWithArgs and _superApplyWithArgs are not memoized, so they can't be left-recursive
-    _applyWithArgs: (rule) ->
+    _applyWithArgs: (rule, args...) ->
       ruleFn = this[rule]
       ruleFnArity = ruleFn.length
       # prepend "extra" arguments in reverse order
-      idx = arguments.length - 1
-      while idx > ruleFnArity
-        @_prependInput arguments[idx]
-        idx--
+      for idx in [args.length - 1..ruleFnArity] by -1
+        @_prependInput args[idx]        
       if ruleFnArity == 0
         ruleFn.call(this)
       else
-        ruleFn.apply this, arguments[1..ruleFnArity]
+        ruleFn.apply this, args[..ruleFnArity]
     
-    _superApplyWithArgs: (recv, rule) ->
-      ruleFn = this[rule]
+    @_superApplyWithArgs: (recv, rule, args...) ->
+      ruleFn = @prototype[rule]
       ruleFnArity = ruleFn.length
       # prepend "extra" arguments in reverse order
-      idx = arguments.length - 1
-      while idx > ruleFnArity + 2      
-        recv._prependInput(arguments[idx])
-        idx--
+      for idx in [args.length - 1...ruleFnArity] by -1      
+        recv._prependInput(args[idx])        
       if ruleFnArity == 0
         ruleFn.call(recv)
       else
-        ruleFn.apply(recv, arguments[2..ruleFnArity + 1])
+        ruleFn.apply(recv, args[..ruleFnArity + 1])
 
     _prependInput: (v) ->
       @input = new OMInputStream v, @input
@@ -200,31 +198,28 @@ define ->
         ruleFn = this[rule]
         ruleFnArity = ruleFn.length
         # prepend "extra" arguments in reverse order
-        idx = arguments.length - 1
-        while idx > ruleFnArity
+        for idx in [args.length - 1..ruleFnArity] by -1        
           @_prependInput arguments[idx]
-          idx--
         if ruleFnArity == 0
           @_apply(rule)
         else
-          this[rule].apply this, arguments[1..ruleFnArity]    
+          this[rule].apply this, arguments[..ruleFnArity]
 
     _pred: (b) ->
       if b
         return true
-      throw fail
+      throw @fail
     
     _not: (x) ->
       origInput = @input
       try
         x.call(this)
       catch f
-        if f != fail
+        if f != @fail
           throw f
         @input = origInput
-        return true
-      }
-      throw fail
+        return true      
+      throw @fail
     
     _lookahead: (x) ->
       origInput = this.input
@@ -239,9 +234,9 @@ define ->
           @input = origInput
           return arg.call(this)
         catch f
-          if f != fail
+          if f != @fail
             throw f      
-      throw fail
+      throw @fail
     
     _xor: (ruleName) ->
       origInput = @input
@@ -255,24 +250,25 @@ define ->
             throw 'more than one choice matched by "exclusive-OR" in ' + ruleName
           newInput = @input      
         catch f
-          if f != fail
+          if f != @fail
             throw f      
         idx++    
       if newInput
         @input = newInput
         return ans    
       else
-        throw fail
+        throw @fail
     
     disableXORs: ->
       @_xor = @_or
     
     _opt: (x) ->
-      origInput = @input, ans
+      origInput = @input
+      ans = undefined
       try 
         ans = x.call(this)
       catch f
-        if f != fail
+        if f != @fail
           throw f
         @input = origInput    
       return ans
@@ -284,7 +280,7 @@ define ->
         try
           ans.push(x.call(this))
         catch f
-          if f != fail
+          if f != @fail
             throw f
           @input = origInput
           break
@@ -296,7 +292,7 @@ define ->
     _form: (x) ->
       v = @_apply("anything")
       if !isSequenceable v
-        throw fail
+        throw @fail
       origInput = @input
       @input = ListOMInputStream.toStream v
       r = x.call(this)
@@ -316,7 +312,8 @@ define ->
     
     # (mode1, part1, mode2, part2 ..., moden, partn)
     _interleave: (mode1, part1, mode2, part2) -> 
-      currInput = @input, ans = []
+      currInput = @input
+      ans = []
       for arg, idx in arguments by 2
         ans[idx / 2] = if (arg == "*" || arg == "+") then [] else undefined
       loop
@@ -335,7 +332,7 @@ define ->
               currInput = @input
               break          
             catch f
-              if f != fail
+              if f != @fail
                 throw f
               # if this (failed) part's mode is "1" or "+", we're not done yet
               allDone = allDone && (arguments[idx] == "*" || arguments[idx] == "?")          
@@ -344,7 +341,7 @@ define ->
           if allDone
             return ans
           else
-            throw fail      
+            throw @fail      
       
     _currIdx: -> @input.idx
 
@@ -376,7 +373,7 @@ define ->
     exactly: (wanted) ->
       if wanted == @_apply("anything")
         return wanted
-      throw fail
+      throw @fail
     
     true: ->
       r = @_apply("anything")
@@ -481,7 +478,7 @@ define ->
       realArgs = [rule]
       for arg in args    
         realArgs.push(arg)
-      var m = new this input
+      m = new this input
       m.initialize()
       try 
         return if realArgs.length == 1
@@ -489,8 +486,8 @@ define ->
         else 
           m._applyWithArgs.apply(m, realArgs)
       catch f
-        if f == fail && matchFailed?
-          var input = m.input
+        if f == @fail && matchFailed?
+          input = m.input
           if input.idx?
             while input.tl? && input.tl.idx?
               input = input.tl
@@ -499,11 +496,13 @@ define ->
         throw f
     
     @match: (obj, rule, args, matchFailed) ->
-      @_genericMatch ListOMInputStream.toStream [obj],    rule, args, matchFailed
+      @_genericMatch ListOMInputStream.toStream([obj]),    rule, args, matchFailed
     
     @matchAll: (listyObj, rule, args, matchFailed) ->
-      @_genericMatch ListOMInputStream.toStream listyObj, rule, args, matchFailed
+      @_genericMatch ListOMInputStream.toStream(listyObj), rule, args, matchFailed  
     
+    @interpreters: {}
+
     #createInstance: ->
     #  m = extendWith this
     #  m.initialize()
