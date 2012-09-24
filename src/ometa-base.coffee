@@ -83,8 +83,8 @@ define ->
   class OMInputStreamEnd extends OMInputStream
     constructor: (@lst, @idx) ->
       @memo = {}
-    head: -> throw @fail
-    tail: -> throw @fail
+    head: -> throw OMeta.prototype.fail
+    tail: -> throw OMeta.prototype.fail
 
 
   class ListOMInputStream extends OMInputStream
@@ -124,10 +124,9 @@ define ->
 
   # the OMeta "class" and basic functionality
   class OMeta
-
-    # shared by static and instance methods
+  
     # failure exception
-    @fail: toString: -> "match failed"    
+    fail: toString: -> "match failed"    
 
     # input is OMListInputStream
     constructor: (@input) ->
@@ -494,7 +493,7 @@ define ->
         else 
           m._applyWithArgs.apply(m, realArgs)
       catch f
-        if f == @fail && matchFailed?
+        if f == @prototype.fail && matchFailed?
           input = m.input
           if input.idx?
             while input.tl? && input.tl.idx?
