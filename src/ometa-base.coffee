@@ -78,7 +78,7 @@ define ->
       while curr != that
         r.push curr.head()
         curr = curr.tail()    
-      if this.type() is String then r.join '' else r  
+      if @type() is String then r.join '' else r  
 
   class OMInputStreamEnd extends OMInputStream
     constructor: (@lst, @idx) ->
@@ -101,8 +101,16 @@ define ->
     @toStream = (iterable) ->
       makeStreamFrom iterable, 0
 
+  objectThatDelegatesTo = (x, props) ->
+    f = ->
+    f.prototype = x
+    r = new f
+    for own key, val of props
+      r[key] = val        
+    r
+
   makeOMInputStreamProxy = (target) ->  
-    $.extend {}, target,
+    objectThatDelegatesTo target,
       memo:   {},
       target: target,
       tl: undefined,
@@ -152,7 +160,7 @@ define ->
       else if memoRec instanceof Failer
         memoRec.used = true
         throw @fail    
-      this.input = memoRec.nextInput
+      @input = memoRec.nextInput
       return memoRec.ans  
 
     # note: _applyWithArgs and _superApplyWithArgs are not memoized, so they can't be left-recursive
@@ -222,9 +230,9 @@ define ->
       throw @fail
     
     _lookahead: (x) ->
-      origInput = this.input
+      origInput = @input
       r         = x.call(this)
-      this.input = origInput
+      @input = origInput
       return r
     
     _or: ->
@@ -401,7 +409,7 @@ define ->
       r
     
     char: ->
-      r = this._apply("anything")
+      r = @_apply("anything")
       @_pred(typeof r == "string" && r.length == 1)
       r
     
@@ -508,7 +516,7 @@ define ->
     #  m.initialize()
     #  m.matchAll = (listyObj, aRule) ->
     #    @input = listyObj.toOMInputStream()
-    #    this._apply(aRule)    
+    #    @_apply(aRule)    
     #  m
 
   return OMeta

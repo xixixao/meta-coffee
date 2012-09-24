@@ -7,6 +7,7 @@ subclass = OMLib.subclass;
 propertyNames = OMLib.propertyNames;
 unescape = OMLib.unescape;
 programString = OMLib.programString;
+StringBuffer = OMLib.StringBuffer;
 
 BSOMetaParser=subclass(OMeta,{
 "space":function(){var $elf=this,_fromIdx=this.input.idx;return this._or((function(){return OMeta._superApplyWithArgs(this,'space')}),(function(){return this._applyWithArgs("fromTo","//","\n")}),(function(){return this._applyWithArgs("fromTo","/*","*/")}))},
@@ -69,7 +70,7 @@ BSOMetaTranslator=subclass(OMeta,{
 "jtCase":function(){var $elf=this,_fromIdx=this.input.idx,x,e;return (function(){this._form((function(){return (function(){x=this._apply("anything");return e=this._apply("trans")}).call(this)}));return [programString(x),e]}).call(this)},
 "locals":function(){var $elf=this,_fromIdx=this.input.idx,vs;return this._or((function(){return (function(){this._form((function(){return vs=this._many1((function(){return this._apply("string")}))}));return ["var ",vs.join(","),";"].join("")}).call(this)}),(function(){return (function(){this._form((function(){return undefined}));return ""}).call(this)}))},
 "trans":function(){var $elf=this,_fromIdx=this.input.idx,t,ans;return (function(){this._form((function(){return (function(){t=this._apply("anything");return ans=this._applyWithArgs("apply",t)}).call(this)}));return ans}).call(this)},
-"transFn":function(){var $elf=this,_fromIdx=this.input.idx,x;return (function(){x=this._apply("trans");return ["(function(){return ",x,"})"].join("")}).call(this)}});(BSOMetaTranslator["jumpTableCode"]=(function (cases){var buf=new StringBuffer();buf.nextPutAll("(function(){switch(this._apply(\'anything\')){");for(var i=(0);(i < cases["length"]);(i+=(1))){buf.nextPutAll((((("case " + cases[i][(0)]) + ":return ") + cases[i][(1)]) + ";"))};buf.nextPutAll("default: throw this.fail}}).call(this)");return buf.contents()}));
+"transFn":function(){var $elf=this,_fromIdx=this.input.idx,x;return (function(){x=this._apply("trans");return ["(function(){return ",x,"})"].join("")}).call(this)}});(BSOMetaTranslator.prototype["jumpTableCode"]=(function (cases){var buf=new StringBuffer();buf.nextPutAll("(function(){switch(this._apply(\'anything\')){");for(var i=(0);(i < cases["length"]);(i+=(1))){buf.nextPutAll((((("case " + cases[i][(0)]) + ":return ") + cases[i][(1)]) + ";"))};buf.nextPutAll("default: throw this.fail}}).call(this)");return buf.contents()}));
 
 
   api = {

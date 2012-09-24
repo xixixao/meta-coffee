@@ -96,10 +96,12 @@ BSJSParser=subclass(OMeta,{
 "switch":function(){var $elf=this,_fromIdx=this.input.idx,x,cases;return (function(){x=this._apply("trans");cases=this._many((function(){return this._apply("trans")}));return (((("switch(" + x) + "){") + cases.join(";")) + "}")}).call(this)},
 "case":function(){var $elf=this,_fromIdx=this.input.idx,x,y;return (function(){x=this._apply("trans");y=this._apply("trans");return ((("case " + x) + ": ") + y)}).call(this)},
 "default":function(){var $elf=this,_fromIdx=this.input.idx,y;return (function(){y=this._apply("trans");return ("default: " + y)}).call(this)}});
-
-  return {
+  
+  api = {
     BSJSParser:        BSJSParser,
     BSSemActionParser: BSSemActionParser,
     BSJSTranslator:    BSJSTranslator
   }
+  $.extend(OMeta.interpreters, api);
+  return api;  
 });

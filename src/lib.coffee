@@ -32,7 +32,7 @@ define ->
       for elem, i in x
         if (i > 0)
           ws.nextPutAll ", "
-        printOn elem, ws
+        printOnto elem, ws
       ws.nextPutAll "]"   
     else
       ws.nextPutAll x.toString()  
@@ -53,7 +53,7 @@ define ->
 #        r[p] = props[p]
 #    return r  
     sub = class extends x
-    for key, val of props
+    for own key, val of props
       sub.prototype[key] = val
     sub
 
@@ -162,3 +162,4 @@ define ->
   propertyNames:    ownPropertyNames
   programString:    toProgramString
   subclass:         objectThatDelegatesTo
+  StringBuffer:     StringBuffer
