@@ -25,5 +25,5 @@ define ->
     line = handledError.line
     lineLimit = 80
     offset = Math.max 0, pos - lineLimit    
-    line[offset..offset + lineLimit] + "\n" +
-    positionAt "^", pos - offset
+    line[offset..offset + lineLimit] + "\n" +    
+    positionAt "⤴", pos - offset

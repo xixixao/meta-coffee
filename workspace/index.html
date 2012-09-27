@@ -1,12 +1,9 @@
+<!DOCTYPE html>
 <html>
-  <head>
+  <head>    
     <title>OMeta/JS 2.0 Workspace</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <script data-main="./main" src="../lib/requirejs/require-jquery.js"></script>
-    <!--<script src="../bin/bs-js-compiler.js"></script>
-    <script src="../bin/bs-ometa-compiler.js"></script>
-    <script src="../bin/bs-ometa-optimizer.js"></script>
-    <script src="../bin/bs-ometa-js-compiler.js"></script>
-    <script src="../bin/bs-project-list-parser.js"></script>-->        
   </head>
   <body>           
     <p>
@@ -18,7 +15,8 @@
       ></textarea>
     </p>
     <p>
-      <input id="doIt" type="button" value="RUUUUUN!">
+      <input id="doIt" type="button" value="Translate">
+      <input id="runIt" type="button" value="Run">
     </p>
     <p>
 
@@ -27,7 +25,9 @@
       <h2>Translation</h2>
     </p>
     <p>
-      <pre id="result"></pre>
+      <pre id="result"
+       style="font-family:Consolas, Monaco, monospace; font-size: 14px"
+      ></pre>
     </p>      
   </body>
 </html>
