@@ -115,7 +115,7 @@ define ->
     "\r": "\\r"
     "\t": "\\t"
     "\v": "\\v"
-  for key, val in specials
+  for key, val of specials
     escapeStringFor[key.charCodeAt 0] = val
 
   escapeChar = (c) ->
@@ -148,7 +148,7 @@ define ->
   toProgramString = (string) ->
     ws = StringBuffer.writeStream '"'
     for ch in string
-      ws.nextPutAll escapeChar ch    
+      ws.nextPutAll escapeChar ch
     ws.nextPutAll('"')
     return ws.contents()  
 

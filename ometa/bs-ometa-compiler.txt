@@ -11,9 +11,9 @@ ometa BSOMetaParser {
                          | char                                   )>:s -> unescape(s)
                  | char,
   tsString       = '\'' (~'\'' eChar)*:xs '\''                         -> xs.join(''),
-  characters     = '`' '`' (~('\'' '\'') eChar)*:xs '\'' '\''          -> [#App, #seq,     xs.join('').toProgramString()],
-  sCharacters    = '"'     (~'"'         eChar)*:xs '"'                -> [#App, #token,   xs.join('').toProgramString()],
-  string         = (('#' | '`') tsName | tsString):xs                  -> [#App, #exactly, xs.toProgramString()],
+  characters     = '`' '`' (~('\'' '\'') eChar)*:xs '\'' '\''          -> [#App, #seq,     programString(xs.join(''))],
+  sCharacters    = '"'     (~'"'         eChar)*:xs '"'                -> [#App, #token,   programString(xs.join(''))],
+  string         = (('#' | '`') tsName | tsString):xs                  -> [#App, #exactly, programString(xs)],
   number         = <'-'? digit+>:n                                     -> [#App, #exactly, n],
   keyword :xs    = token(xs) ~letterOrDigit                            -> xs,
   args           = '(' listOf(#hostExpr, ','):xs ")"                   -> xs
@@ -66,7 +66,7 @@ ometa BSOMetaParser {
   ruleName       = name
                  | spaces tsString,
   rule           = &(ruleName:n) !(this.locals = {'$elf=this': true, '_fromIdx=this.input.idx': true})
-                     rulePart(n):x ("," rulePart(n))*:xs               -> [#Rule, n, ownPropertyNames(this.locals),
+                     rulePart(n):x ("," rulePart(n))*:xs               -> [#Rule, n, propertyNames(this.locals),
                                                                             [#Or, x].concat(xs)],
   rulePart :rn   = ruleName:n ?(n == rn) expr4(false):b1 ( "=" expr:b2 -> [#And, b1, b2]
                                                          | empty       -> b1
@@ -88,7 +88,7 @@ ometa BSOMetaTranslator {
   Act        :expr                         -> expr,
   Pred       :expr                         -> ['this._pred(', expr, ')']                                           .join(''),
   Or         transFn*:xs                   -> ['this._or(',  xs.join(','), ')']                                    .join(''),
-  XOr        transFn*:xs                       {xs.unshift((this.name + "." + this.rName).toProgramString())}
+  XOr        transFn*:xs                       {xs.unshift(programString(this.name + "." + this.rName))}
                                            -> ['this._xor(', xs.join(','), ')']                                    .join(''),
   And        notLast(#trans)*:xs trans:y
              {xs.push('return ' + y)}      -> ['(function(){', xs.join(';'), '}).call(this)']                      .join(''),
@@ -111,8 +111,8 @@ ometa BSOMetaTranslator {
              {this.name = name}
              {this.sName = sName}
              trans*:rules                  -> [name, '=subclass(', sName, ',{', rules.join(','), '});'].join(''),
-  intPart  = [:mode transFn:part]          -> (mode.toProgramString()  + "," + part),
-  jtCase   = [:x trans:e]                  -> [x.toProgramString(), e],
+  intPart  = [:mode transFn:part]          -> (programString(mode)  + "," + part),
+  jtCase   = [:x trans:e]                  -> [programString(x), e],
   locals   = [string+:vs]                  -> ['var ', vs.join(','), ';']                                          .join('')
            | []                            -> '',
   trans    = [:t apply(t):ans]             -> ans,
@@ -126,4 +126,3 @@ BSOMetaTranslator.jumpTableCode = function(cases) {
   buf.nextPutAll("default: throw fail}}).call(this)")
   return buf.contents()
 }
-

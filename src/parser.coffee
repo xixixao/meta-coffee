@@ -1,5 +1,5 @@
 define [
-  'cs!ometa-base'
+  'cs!./ometa-base'
 ], (OMeta) ->
   class Parser extends OMeta
 
