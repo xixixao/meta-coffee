@@ -165,6 +165,8 @@ define ->
     # note: _applyWithArgs and _superApplyWithArgs are not memoized, so they can't be left-recursive
     _applyWithArgs: (rule, args...) ->
       ruleFn = this[rule]
+      unless ruleFn?
+          throw 'tried to apply undefined rule "' + rule + '"'
       ruleFnArity = ruleFn.length
       # prepend "extra" arguments in reverse order
       for idx in [args.length - 1..ruleFnArity] by -1
@@ -176,6 +178,8 @@ define ->
     
     @_superApplyWithArgs: (recv, rule, args...) ->
       ruleFn = @prototype[rule]
+      unless ruleFn?
+          throw 'tried to apply undefined rule "' + rule + '"'
       ruleFnArity = ruleFn.length
       # prepend "extra" arguments in reverse order
       for idx in [args.length - 1...ruleFnArity] by -1      
