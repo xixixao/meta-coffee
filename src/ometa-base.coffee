@@ -319,7 +319,7 @@ define ->
     _idxConsumedBy: (x) ->
       origInput = @input
       x.call(this)    
-      return fromIdx: origInput.idx, toIdx: @input.idx
+      return [origInput.idx, @input.idx]
     
     # (mode1, part1, mode2, part2 ..., moden, partn)
     _interleave: (mode1, part1, mode2, part2) -> 
