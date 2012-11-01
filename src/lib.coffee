@@ -59,7 +59,19 @@ define ->
 
   # some reflective stuff
   ownPropertyNames = (x) ->
-    key for own key of x    
+    key for own key of x
+
+  class Set
+    constructor: ->
+      @data = {}
+
+    add: (what...) ->
+      for one in what
+        @data[one] = true
+      this
+
+    values: ->
+      key for own key of @data
 
   # some functional programming stuff - never used
 
