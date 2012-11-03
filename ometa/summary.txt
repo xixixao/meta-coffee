@@ -142,7 +142,7 @@ Indentation rules:
       arrSemAction   = "->" linePos:p openHostExpr(p):x                    -> [#Act, x],
       semPred        = "&" closedHostExpr:x                                -> [#Pred, x]
                      | "!" closedHostExpr:x                                -> [#Not, [#Pred, x]],
-      expr :p        = setdent(p) expr5:x {this.redent()}                  -> x,  
+      expr :p        = setdent(p) expr5:x {this.redent()}                  -> x,
       expr5          = expr4(true):x ( "|" expr4(true))+:xs                -> [#Or,  x].concat(xs)
                      | expr4(true):x ("||" expr4(true))+:xs                -> [#XOr, x].concat(xs)
                      | expr4(false),  
@@ -213,6 +213,9 @@ DentParser
       moredent :p    = dent:d &{d >= p} -> '\n' + $.repeat(d - p, ' ')
       lessdent :p    = dent:d &{d <= p}
                      | end
+      setdent :p     = {this.mindent.push(p)},
+      redent         = {this.mindent.pop()},
+      spacedent      = ?{this.mindent.top() >= 0} moredent(this.mindent.top())
 
 
 SemActionParser
@@ -246,7 +249,7 @@ OMetaParser
 ometa OMetaParser extends DentParser
   lineComment    = fromTo('#', '\n')
   blockComment   = fromTo('#>', '<#')
-  space          = ' ' | lineComment | blockComment
+  space          = ' ' | spacedent | lineComment | blockComment
   blankLine      = ' '* (lineComment | blockComment ' '* '\n')
                  | ^blankLine
   nameFirst      = '_' | '$' | letter      
@@ -273,7 +276,8 @@ ometa OMetaParser extends DentParser
   arrSemAction   = "->" linePos:p openHostExpr(p):x                    -> ['Act', x]
   semPred        = "&" closedHostExpr:x                                -> ['Pred', x]
                  | "!" closedHostExpr:x                                -> ['Not', ['Pred', x]]
-  expr :p        = expr4(true):x (moredent(p)? "|" expr4(true))+:xs    -> ['Or',  x].concat(xs)
+  expr :p        = setdent(p) expr5:x {this.redent()}                  -> x,  
+  expr5 :p       = expr4(true):x (moredent(p)? "|" expr4(true))+:xs    -> ['Or',  x].concat(xs)
                  | expr4(true):x ("||" expr4(true))+:xs                -> ['XOr', x].concat(xs)
                  | expr4(false)
   expr4 :ne      =       expr3*:xs arrSemAction:act                    -> ['And'].concat(xs).concat([act])
@@ -301,8 +305,8 @@ ometa OMetaParser extends DentParser
                  | "("  expr(0):x ")"                                  -> x
   ruleName       = bareName
   rule           = &(ruleName:n) {this.locals = new Set()}
-                    linePos:p rulePart(n):x 
-                     (nodent(p) rulePart(n))*:xs                       -> ['Rule', n, this.locals.values(),
+                    linePos:p setdent(p + 1) rulePart(n):x 
+                     (nodent(p) rulePart(n))*:xs {this.redent()}       -> ['Rule', n, this.locals.values(),
                                                                            ['Or', x].concat(xs)]
   rulePart :rn   = ruleName:n &{n == rn} expr4(false):b1 
                    ( spaces linePos:p '=' expr(p):b2 -> ['And', b1, b2]
