@@ -23,6 +23,7 @@ Overwrites base-rule **exactly** to use **nl** instead of matching \n and
 removes \n from super-rule **space**.
 
     ometa DentParser {
+      initialize     = {this.mindent = new Stack().push(-1)},
       exactly        = '\n' apply("nl")
                      | :other ^exactly(other),
       inspace        = ~exactly('\n') space,
@@ -33,7 +34,10 @@ removes \n from super-rule **space**.
       nodent :p      = dent:d ?(d == p),
       moredent :p    = dent:d ?(d >= p) -> ('\n' + $.repeat(d - p, ' ')),
       lessdent :p    = dent:d ?(d <= p)
-                     | inspace* end
+                     | inspace* end,
+      setdent :p     = {this.mindent.push(p)},
+      redent         = {this.mindent.pop()},
+      spacedent      = ?(this.mindent.top() >= 0) moredent(this.mindent.top())
     }
 
 SemActionParser
@@ -88,10 +92,11 @@ Notable changes to the original syntax:
 
 Some of these (f.e. semantic predicates syntax) were inspired by PEG.js.
 
+    
     ometa OMetaParser <: DentParser {
       lineComment    = fromTo('#', '\n'),
       blockComment   = fromTo('#>', '<#'),
-      space          = ' ' | lineComment | blockComment,
+      space          = ' ' | spacedent | lineComment | blockComment,
       blankLine      = ' '* (lineComment | blockComment ' '* '\n')
                      | ^blankLine,
       nameFirst      = '_' | '$' | letter,      
@@ -118,7 +123,9 @@ Some of these (f.e. semantic predicates syntax) were inspired by PEG.js.
       arrSemAction   = "->" linePos:p openHostExpr(p):x                    -> [#Act, x],
       semPred        = "&" closedHostExpr:x                                -> [#Pred, x]
                      | "!" closedHostExpr:x                                -> [#Not, [#Pred, x]],
-      expr :p        = expr4(true):x (moredent(p)? "|" expr4(true))+:xs    -> [#Or,  x].concat(xs)
+      expr :p        = setdent(p) expr5:x {this.redent()}                  -> x,
+      paramExpr      = setdent(p) expr4(false):x {this.redent()}           -> x, 
+      expr5          = expr4(true):x ( "|" expr4(true))+:xs                -> [#Or,  x].concat(xs)
                      | expr4(true):x ("||" expr4(true))+:xs                -> [#XOr, x].concat(xs)
                      | expr4(false),  
       expr4 :ne      =                expr3*:xs arrSemAction:act           -> [#And].concat(xs).concat([act])
@@ -144,14 +151,14 @@ Some of these (f.e. semantic predicates syntax) were inspired by PEG.js.
                      | "<"  expr(0):x ">"                                  -> [#ConsBy,    x]
                      | "@<" expr(0):x ">"                                  -> [#IdxConsBy, x]
                      | "("  expr(0):x ")"                                  -> x,    
-      ruleName       = bareName,                     
+      ruleName       = bareName,
       rule           = &(ruleName:n) !(this.locals = {})
                         linePos:p rulePart(n):x 
                          (nodent(p) rulePart(n))*:xs                       -> [#Rule, n, propertyNames(this.locals),
                                                                                [#Or, x].concat(xs)],
       rulePart :rn   = ruleName:n ?(n == rn) expr4(false):b1 
-                       ( spaces linePos:p '=' expr(p):b2 -> [#And, b1, b2]
-                       | empty                    -> b1
+                       ( spaces linePos:p '=' expr(p):b2            -> [#And, b1, b2]
+                       | empty                               -> b1
                        ),
       grammar        = linePos:ip
                        keyword('ometa') name:n
