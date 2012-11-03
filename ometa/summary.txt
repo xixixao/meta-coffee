@@ -18,6 +18,10 @@ Uses spaces to indent lines.
   followed by the additional indentation
 - **lessdent** matches if next line has same or smaller indentation or it is the
   end of input
+- **setdent** sets the level of indentation treated as a space
+- **redent** set the level of indentation treated as a space to a previous level
+- **spacedent** to be included in `space` rule, matches indent of a level set by
+  setdent
 
 Overwrites base-rule **exactly** to use **nl** instead of matching \n and
 removes \n from super-rule **space**.
@@ -89,10 +93,25 @@ Notable changes to the original syntax:
 - there is a new inverse semantic predicate, prefixed with `!` (akin to 
   negative lookahead)
 - keyword `<:` is now `extends` mimicking CoffeeScript classes
+- syntax of OMeta is whitespace-significant, most noticebly there is no need
+  for a comma at the end of a rule
 
 Some of these (f.e. semantic predicates syntax) were inspired by PEG.js.
 
-    
+Indentation rules:
+
+- header must be followed by an indented list of rules (or ML-style rule parts),
+  all rules must be be indented the same number of spaces
+- rule's parameters must either follow on the same line or be indented more
+  than the rule's name
+- same applies to the optional equal sign
+- rule right-hand side must either follow `=` on the same line or be indented
+  at least as much as the equal sign
+- tokens inside parentheses do not need to be indented
+- semantic actions after `->` must follow on the same line or be indented on the
+  next lines to start right **after** the arrow sign, the whitespace equal to
+  additional indentation is stripped from the semantic action
+
     ometa OMetaParser <: DentParser {
       lineComment    = fromTo('#', '\n'),
       blockComment   = fromTo('#>', '<#'),
