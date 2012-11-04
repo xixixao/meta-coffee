@@ -213,23 +213,23 @@ OMetaJS whitespace significant in its own syntax
 
 DentParser
 ----------
-
     ometa DentParser
+      initialize     = {this.mindent = new Stack().push(-1)}
       exactly        = '\n' apply("nl")
                      | :other ^exactly(other)
-      inspace        = !exactly('\n') ^space
+      inspace        = !exactly('\n') space
       nl             = ^exactly('\n') pos:p {this.lineStart = p} -> '\n'
       blankLine      = inspace* '\n'
       dent           = inspace* '\n' blankLine* ' '*:ss -> ss.length
-      linePos        = pos:p -> p - this.lineStart
+      linePos        = pos:p -> (p - (this.lineStart || 0))
+      stripdent :d :p -> ('\n' + $.repeat(d - p, ' '))
       nodent :p      = dent:d &{d == p}
-      moredent :p    = dent:d &{d >= p} -> '\n' + $.repeat(d - p, ' ')
+      moredent :p    = dent:d &{d >= p} stripdent(d, p)
       lessdent :p    = dent:d &{d <= p}
-                     | end
+                     | inspace* end
       setdent :p     = {this.mindent.push(p)}
       redent         = {this.mindent.pop()}
       spacedent      = &{this.mindent.top() >= 0} moredent(this.mindent.top())
-
 
 SemActionParser
 ---------------
