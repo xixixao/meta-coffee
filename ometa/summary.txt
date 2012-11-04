@@ -35,8 +35,9 @@ removes \n from super-rule **space**.
       blankLine      = inspace* '\n',
       dent           = inspace* '\n' blankLine* ' '*:ss -> ss.length,  
       linePos        = pos:p -> (p - (this.lineStart || 0)),  
+      stripdent :d :p -> ('\n' + $.repeat(d - p, ' ')),
       nodent :p      = dent:d ?(d == p),
-      moredent :p    = dent:d ?(d >= p) -> ('\n' + $.repeat(d - p, ' ')),
+      moredent :p    = dent:d ?(d >= p) stripdent(d, p),
       lessdent :p    = dent:d ?(d <= p)
                      | inspace* end,
       setdent :p     = {this.mindent.push(p)},
@@ -58,24 +59,29 @@ Also strips additional indentation below the given level.
 Strings cannot contain escaped quotes at the moment.
 
     ometa SemActionParser <: DentParser {
-      pairOf :s :e   = seq(s) text(true):t seq(e) -> t,
+      initialize     = {this.dentlevel = 0} ^initialize,
+      between :s :e  = seq(s) text(true):t seq(e) -> t,
+      pairOf :s :e   = between(s, e):t -> (s + t + e),
       delims         = '{' | '(' | '[' 
                      | '}' | ')' | ']',
       pair           = pairOf('{', '}')
                      | pairOf('(', ')')
                      | pairOf('[', ']'),  
-      text :inside   = <( fromTo('/*', '*/') 
-                     | fromTo('"', '"') 
-                     | fromTo('\'', '\'') 
-                     | ?inside ~delims anything:a
-                     | ~exactly('\n') ~delims  anything:a
-                     | pair)*>,
+      text3          = dent:d stripdent(d, this.dentlevel)
+                     | ~exactly('\n') anything,
+      text2 :inside  = fromTo('/*', '*/')
+                     | fromTo('"', '"')
+                     | fromTo('\'', '\'')
+                     | ?inside ~delims text3
+                     | ~exactly('\n') ~delims anything
+                     | pair,
+      text :inside   = text2(inside)*:ts         -> ts.join(''),
       line           = text(false),
       nextLine :p    = moredent(p):d line:l       -> (d + l),
       exp :p         = line:fl nextLine(p)*:ls    -> (fl + ls.join('')),
-      delimSemAction = spaces pairOf('{', '}'):e  -> e,
-      semAction :p   = delimSemAction
-                     | exp(p)
+      delimSemAction = spaces between('{', '}'),
+      semAction :p   = {this.dentlevel = p} (delimSemAction
+                                            | exp(p))
     }
 
 OMetaParser
