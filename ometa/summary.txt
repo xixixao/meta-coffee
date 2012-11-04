@@ -130,7 +130,7 @@ Indentation rules:
   additional indentation is stripped from the semantic action
 
     ometa OMetaParser <: DentParser {
-      lineComment    = fromTo('#', '\n'),
+      lineComment    = fromTo('# ', '\n'),
       blockComment   = fromTo('#>', '<#'),
       space          = ' ' | spacedent | lineComment | blockComment,
       blankLine      = ' '* (lineComment | blockComment ' '* '\n')
@@ -274,7 +274,7 @@ OMetaParser
 -----------
 
     ometa OMetaParser extends DentParser
-      lineComment    = fromTo('#', '\n')
+      lineComment    = fromTo('# ', '\n')
       blockComment   = fromTo('#>', '<#')
       space          = ' ' | spacedent | lineComment | blockComment
       blankLine      = ' '* (lineComment | blockComment ' '* '\n')
