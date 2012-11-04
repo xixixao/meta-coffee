@@ -226,9 +226,9 @@ DentParser
       moredent :p    = dent:d &{d >= p} -> '\n' + $.repeat(d - p, ' ')
       lessdent :p    = dent:d &{d <= p}
                      | end
-      setdent :p     = {this.mindent.push(p)},
-      redent         = {this.mindent.pop()},
-      spacedent      = ?{this.mindent.top() >= 0} moredent(this.mindent.top())
+      setdent :p     = {this.mindent.push(p)}
+      redent         = {this.mindent.pop()}
+      spacedent      = &{this.mindent.top() >= 0} moredent(this.mindent.top())
 
 
 SemActionParser
@@ -348,3 +348,7 @@ OMetaParser
                        lessdent(ip)                                         BSOMetaOptimizer.optimizeGrammar(
                                                                                 ['Grammar', n, sn, r].concat(rs)
                                                                               )
+
+MetaCoffee in OMetaJS whitespace significant
+------------------------------------------------
+
