@@ -1,4 +1,4 @@
-var requirejs = require('requirejs');
+requirejs = require 'requirejs'
 
 requirejs.config 
     # Use node's special variable __dirname to
