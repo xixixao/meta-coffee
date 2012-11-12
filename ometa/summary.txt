@@ -1,13 +1,10 @@
-MetaCoffee Bootstrapping
-------------------------
+# MetaCoffee Bootstrapping
 
 This is the list of OMeta definitions for bootstrapping the **MetaCoffee**
 
-OMetaJS whitespace significant in original OMetaJS syntax
----------------------------------------------------------
+## OMetaJS whitespace significant in original OMetaJS syntax
 
-DentParser
-----------
+### DentParser
 
 Uses spaces to indent lines.
 
@@ -45,8 +42,7 @@ removes \n from super-rule **space**.
       spacedent      = ?(this.mindent.top() >= 0) moredent(this.mindent.top())
     }
 
-SemActionParser
----------------
+### SemActionParser
 
 Fake semantic parser, given indentation level or delimiting requirement matches
 JavaScript and returns it.
@@ -95,8 +91,7 @@ Strings cannot contain escaped quotes at the moment.
                        | exp(p):e -> JSSemActionParser.matchAll(e, "semAction"))
     }
 
-OMetaParser
------------
+### OMetaParser
 
 Matches MetaCoffee whitespace-significant syntax instead of original OMeta
 syntax.
@@ -128,6 +123,8 @@ Indentation rules:
 - semantic actions after `->` must follow on the same line or be indented on the
   next lines to start right **after** the arrow sign, the whitespace equal to
   additional indentation is stripped from the semantic action
+
+.
 
     ometa OMetaParser <: DentParser {
       lineComment    = fromTo('# ', '\n'),
@@ -196,7 +193,7 @@ Indentation rules:
                        ( spaces linePos:p '=' expr(p):b2            -> [#And, b1, b2]
                        | empty                                -> b1
                        ),
-      grammar        = linePos:ip
+      grammar        = (inspace*:ss -> ss.length):ip
                        keyword('ometa') name:n
                        ( keyword('extends') name | empty -> 'OMeta' ):sn
                        moredent(ip)
@@ -208,11 +205,10 @@ Indentation rules:
     }
 
 
-OMetaJS whitespace significant in its own syntax
-------------------------------------------------
+## OMetaJS whitespace significant in its own syntax
 
-DentParser
-----------
+### DentParser
+
     ometa DentParser
       initialize     = {this.mindent = new Stack().push(-1)}
       exactly        = '\n' apply("nl")
@@ -231,8 +227,7 @@ DentParser
       redent         = {this.mindent.pop()}
       spacedent      = &{this.mindent.top() >= 0} moredent(this.mindent.top())
 
-SemActionParser
----------------
+### SemActionParser
 
     ometa JSSemActionParser extends BSJSParser
       semAction = expr:e spaces end -> e
@@ -270,8 +265,7 @@ SemActionParser
                        (delimSemAction
                        | exp(p):e -> JSSemActionParser.matchAll(e, "semAction"))
 
-OMetaParser
------------
+### OMetaParser
 
     ometa OMetaParser extends DentParser
       lineComment    = fromTo('# ', '\n')
@@ -349,6 +343,263 @@ OMetaParser
                                                                                 ['Grammar', n, sn, r].concat(rs)
                                                                               )
 
-MetaCoffee in OMetaJS whitespace significant
-------------------------------------------------
+## MetaCoffee in OMetaJS whitespace significant
 
+### SemActionParser
+
+    ometa CSParser
+      action :input :args    = compile(input, args):compiled (simplify(compiled) | -> compiled)
+      simpleExp :input :args = compile(input, args):compiled simplify(compiled)
+      compile :input :args  -> $.trim(BSCoffeeScriptCompiler.compile("((" + args.join() + ") ->\n  "
+                                                 + input.replace(/\n/g, '\n  ') + ").call(this)", {bare:true})).replace(/^\(function.*?\)/, '(function()').replace(/;$/, '');
+      simplify :compiled ->  var lines = compiled.split('\n');
+                             if (lines.length < 2 || !lines[1].match(/^ +return/)) {
+                               throw this.fail;
+                             }
+                             exp = lines.slice(1, -1);
+                             exp[0] = exp[0].replace(/^ +return /, '');
+                             exp.join('\n').replace(/;$/, '');
+
+    ometa SemActionParser extends BSDentParser
+      initialize     = {this.dentlevel = 0} ^initialize
+      between :s :e  = seq(s) text(true):t seq(e) -> t
+      pairOf :s :e   = between(s, e):t -> s + t + e
+      delims         = '{' | '(' | '['
+                     | '}' | ')' | ']'
+      pair           = pairOf('{', '}')
+                     | pairOf('(', ')')
+                     | pairOf('[', ']')
+      text3          = dent:d stripdent(d, this.dentlevel)
+                     | !exactly('\n') anything
+      fromTo :s :e   = <seq(s) (seq('\\\\') | seq('\\') seq(e) | !seq(e) char)* seq(e)>
+      text2 :inside  = fromTo('###', '###')
+                     | fromTo('"', '"')
+                     | fromTo('\'', '\'')
+                     | &{inside} !delims text3
+                     | !exactly('\n') !delims anything
+                     | pair
+      text :inside   = text2(inside)*:ts          -> ts.join('')
+      line           = text(false)
+      nextLine :p    = moredent(p):d line:l       -> d + l
+      exp :p         = line:fl nextLine(p)*:ls    -> fl + ls.join('')
+      simpleExp :args      = spaces (!delims !',' anything | pair)+:ts CSParser.simpleExp(ts.join(''), args)
+      delimSemAction :args = spaces between('{', '}'):e CSParser.action(e, args)
+      semAction :p :args   = {this.dentlevel = p}
+                           (delimSemAction
+                           | exp(p):e CSParser.action(e, args))
+
+### OMetaParser
+
+    ometa OMetaParser extends BSDentParser
+      lineComment    = fromTo('# ', '\n')
+      blockComment   = fromTo('#>', '<#')
+      space          = ' ' | spacedent | lineComment | blockComment
+      blankLine      = ' '* (lineComment | blockComment ' '* '\n')
+                     | ^blankLine
+      nameFirst      = '_' | '$' | letter
+      bareName       = <nameFirst (nameFirst | digit)*>
+      name           = spaces bareName
+      hexDigit       = char:x {this.hexValue(x)}:v &{v >= 0}               -> v
+      escapedChar    = <'\\' ( 'u' hexDigit hexDigit hexDigit hexDigit
+                             | 'x' hexDigit hexDigit
+                             | char                                   )>:s -> unescape(s)
+                     | char
+      charSequence   = '"'  ( !'"' escapedChar)*:xs  '"'                   -> ['App', 'token',   programString(xs.join(''))]
+      string         = '\'' (!'\'' escapedChar)*:xs '\''                   -> ['App', 'exactly', programString(xs.join(''))]
+      number         = <'-'? digit+>:n                                     -> ['App', 'exactly', n]
+      keyword :xs    = token(xs) !letterOrDigit                            -> xs
+      args           = '(' listOf('hostExpr', ','):xs ")"                  -> xs
+                     | empty                                               -> []
+      application    = "^"          name:rule args:as                      -> ['App', "super",        "'" + rule + "'"].concat(as)
+                     | name:grm "." name:rule args:as                      -> ['App', "foreign", grm, "'" + rule + "'"].concat(as)
+                     |              name:rule args:as                      -> ['App', rule].concat(as)
+      hostExpr        = SemActionParser.simpleExp(this.locals.values()):r
+      closedHostExpr  = SemActionParser.delimSemAction(this.locals.values()):r
+      openHostExpr :p = SemActionParser.semAction(p, this.locals.values()):r 
+      semAction      = closedHostExpr:x                                    -> ['Act', x]
+      arrSemAction   = "->" linePos:p openHostExpr(p):x                    -> ['Act', x]
+      semPred        = "&" closedHostExpr:x                                -> ['Pred', x]
+                     | "!" closedHostExpr:x                                -> ['Not', ['Pred', x]]
+      expr :p        = setdent(p) expr5:x {this.redent()}                  -> x
+      expr5          = expr4(true):x ("|" expr4(true))+:xs                 -> ['Or',  x].concat(xs)
+                     | expr4(true):x ("||" expr4(true))+:xs                -> ['XOr', x].concat(xs)
+                     | expr4(false)
+      expr4 :ne      =       expr3*:xs arrSemAction:act                    -> ['And'].concat(xs).concat([act])
+                     | &{ne} expr3+:xs                                     -> ['And'].concat(xs)
+                     | !{ne} expr3*:xs                                     -> ['And'].concat(xs)
+      optIter :x     = '*'                                                 -> ['Many',  x]
+                     | '+'                                                 -> ['Many1', x]
+                     | '?'                                                 -> ['Opt',   x]
+                     | empty                                               -> x
+      optBind :x     = ':' name:n                                          -> this.locals.add(n); ['Set', n, x]
+                     | empty                                               -> x
+      expr3          = ":" name:n                                          -> this.locals.add(n); ['Set', n, ['App', 'anything']]
+                     | (expr2:x optIter(x) | semAction):e optBind(e)
+                     | semPred
+      expr2          = "!" expr2:x                                         -> ['Not',       x]
+                     | "&" expr1:x                                         -> ['Lookahead', x]
+                     | expr1
+      expr1          = application
+                     | ( keyword('undefined') | keyword('nil')
+                       | keyword('true')      | keyword('false') ):x       -> ['App', 'exactly', x]
+                     | spaces (charSequence | string | number)
+                     | "["  expr(0):x "]"                                  -> ['Form',      x]
+                     | "<"  expr(0):x ">"                                  -> ['ConsBy',    x]
+                     | "@<" expr(0):x ">"                                  -> ['IdxConsBy', x]
+                     | "("  expr(0):x ")"                                  -> x
+      ruleName       = bareName
+      rule           = &(ruleName:n) {this.locals = new Set()}
+                        linePos:p setdent(p + 1) rulePart(n):x
+                         (nodent(p) rulePart(n))*:xs {this.redent()}       -> ['Rule', n, this.locals.values(),
+                                                                               ['Or', x].concat(xs)]
+      rulePart :rn   = ruleName:n &{n == rn} expr4(false):b1
+                       ( spaces linePos:p '=' expr(p):b2 -> ['And', b1, b2]
+                       | empty                           -> b1
+                       )
+      grammar        = (inspace*:ss -> ss.length):ip
+                       keyword('ometa') name:n
+                       ( keyword('extends') name | empty -> 'OMeta' ):sn
+                       moredent(ip)
+                         linePos:p rule:r
+                         (nodent(p) rule)*:rs
+                       lessdent(ip)                                         BSOMetaOptimizer.optimizeGrammar(
+                                                                                ['Grammar', n, sn, r].concat(rs)
+                                                                              )
+
+## MetaCoffee in MetaCoffee
+
+### SemActionParser
+
+    ometa CSParser
+      action :input :args    = compile(input, args):compiled (simplify(compiled) | -> compiled)
+      simpleExp :input :args = compile(input, args):compiled simplify(compiled)
+      compile :input :args  -> $.trim(BSCoffeeScriptCompiler.compile("((" + args.join() + ") ->\n  " +
+                                           input.replace(/\n/g, '\n  ') + ").call(this)", {bare:true})).replace(/^\(function.*?\)/, '(function()').replace /;$/, ''
+      simplify :compiled ->  lines = compiled.split('\n')
+                             if lines.length < 2 || !lines[1].match(/^ +return/)
+                               throw @fail
+                             exp = lines[1...-1]
+                             exp[0] = exp[0].replace /^ +return /, ''
+                             exp.join('\n').replace /;$/, ''
+
+    ometa SemActionParser extends BSDentParser
+      initialize     = {@dentlevel = 0; @sep = 'none'} ^initialize
+      none           = !empty
+      comma          = ','
+      between :s :e  = seq(s) text(true):t seq(e) -> t
+      pairOf :s :e   = between(s, e):t -> s + t + e
+      delims         = '{' | '(' | '['
+                     | '}' | ')' | ']'
+      pair           = pairOf('{', '}')
+                     | pairOf('(', ')')
+                     | pairOf('[', ']')
+      text3          = dent:d stripdent(d, @dentlevel)
+                     | !exactly('\n') anything
+      fromTo :s :e   = <seq(s) (seq('\\\\') | seq('\\') seq(e) | !seq(e) char)* seq(e)>
+      text2 :inside  = fromTo('###', '###')
+                     | fromTo('"', '"')
+                     | fromTo('\'', '\'')
+                     | &{inside} !delims text3
+                     | !exactly('\n') !delims !apply(@sep) anything
+                     | pair
+      text :inside   = text2(inside)*:ts          -> ts.join ''
+      line           = text(false)
+      nextLine :p    = moredent(p):d line:l       -> d + l
+      exp :p         = line:fl nextLine(p)*:ls    -> fl + ls.join ''
+      simpleExp :args      = spaces {@sep = 'comma'} text(false):t CSParser.simpleExp(t, args)
+      delimSemAction :args = spaces between('{', '}'):e CSParser.action(e, args)
+      semAction :p :args   = {@dentlevel = p}
+                             (delimSemAction
+                             | exp(p):e CSParser.action(e, args))
+
+### OMetaParser
+
+    ometa OMetaParser extends BSDentParser
+      lineComment    = fromTo('# ', '\n')
+      blockComment   = fromTo('#>', '<#')
+      space          = ' ' | spacedent | lineComment | blockComment
+      blankLine      = ' '* (lineComment | blockComment ' '* '\n')
+                     | ^blankLine
+      nameFirst      = '_' | '$' | letter
+      bareName       = <nameFirst (nameFirst | digit)*>
+      name           = spaces bareName
+      hexDigit       = char:x {this.hexValue(x)}:v &{v >= 0}               -> v
+      escapedChar    = <'\\' ( 'u' hexDigit hexDigit hexDigit hexDigit
+                             | 'x' hexDigit hexDigit
+                             | char                                   )>:s -> unescape s
+                     | char
+      charSequence   = '"'  ( !'"' escapedChar)*:xs  '"'                   -> ['App', 'token',   programString xs.join '']
+      string         = '\'' (!'\'' escapedChar)*:xs '\''                   -> ['App', 'exactly', programString xs.join '']
+      number         = <'-'? digit+>:n                                     -> ['App', 'exactly', n]
+      keyword :xs    = token(xs) !letterOrDigit                            -> xs
+      args           = '(' listOf('hostExpr', ','):xs ")"                  -> xs
+                     | empty                                               -> []
+      application    = "^"          name:rule args:as                      -> ['App', "super",        "'" + rule + "'"].concat as
+                     | name:grm "." name:rule args:as                      -> ['App', "foreign", grm, "'" + rule + "'"].concat as
+                     |              name:rule args:as                      -> ['App', rule].concat as
+      hostExpr        = SemActionParser.simpleExp(@locals.values()):r
+      closedHostExpr  = SemActionParser.delimSemAction(@locals.values()):r
+      openHostExpr :p = SemActionParser.semAction(p, @locals.values()):r 
+      semAction      = closedHostExpr:x                                    -> ['Act', x]
+      arrSemAction   = "->" linePos:p openHostExpr(p):x                    -> ['Act', x]
+      semPred        = "&" closedHostExpr:x                                -> ['Pred', x]
+                     | "!" closedHostExpr:x                                -> ['Not', ['Pred', x]]
+      expr :p        = setdent(p) expr5:x {this.redent()}                  -> x
+      expr5          = expr4(true):x ("|" expr4(true))+:xs                 -> ['Or',  x].concat xs
+                     | expr4(true):x ("||" expr4(true))+:xs                -> ['XOr', x].concat xs
+                     | expr4(false)
+      expr4 :ne      =       expr3*:xs arrSemAction:act                    -> ['And'].concat(xs).concat [act]
+                     | &{ne} expr3+:xs                                     -> ['And'].concat xs
+                     | !{ne} expr3*:xs                                     -> ['And'].concat xs
+      optIter :x     = '*'                                                 -> ['Many',  x]
+                     | '+'                                                 -> ['Many1', x]
+                     | '?'                                                 -> ['Opt',   x]
+                     | empty                                               -> x
+      optBind :x     = ':' name:n                                          -> @locals.add n; ['Set', n, x]
+                     | empty                                               -> x
+      expr3          = ":" name:n                                          -> @locals.add n; ['Set', n, ['App', 'anything']]
+                     | (expr2:x optIter(x) | semAction):e optBind(e)
+                     | semPred
+      expr2          = "!" expr2:x                                         -> ['Not',       x]
+                     | "&" expr1:x                                         -> ['Lookahead', x]
+                     | expr1
+      expr1          = application
+                     | ( keyword('undefined') | keyword('nil')
+                       | keyword('true')      | keyword('false') ):x       -> ['App', 'exactly', x]
+                     | spaces (charSequence | string | number)
+                     | "["  expr(0):x "]"                                  -> ['Form',      x]
+                     | "<"  expr(0):x ">"                                  -> ['ConsBy',    x]
+                     | "@<" expr(0):x ">"                                  -> ['IdxConsBy', x]
+                     | "("  expr(0):x ")"                                  -> x
+      ruleName       = bareName
+      rule           = &(ruleName:n) {@locals = new Set}
+                        linePos:p setdent(p + 1) rulePart(n):x
+                         (nodent(p) rulePart(n))*:xs {this.redent()}       -> ['Rule', n, this.locals.values(),
+                                                                               ['Or', x].concat xs]
+      rulePart :rn   = ruleName:n &{n == rn} expr4(false):b1
+                       ( spaces linePos:p '=' expr(p):b2 -> ['And', b1, b2]
+                       | empty                           -> b1
+                       )
+      grammar        = (inspace*:ss -> ss.length):ip
+                       keyword('ometa') name:n
+                       ( keyword('extends') name | empty -> 'OMeta' ):sn  {log ip}
+                       moredent(ip)
+                         linePos:p rule:r
+                         (nodent(p) rule)*:rs
+                       lessdent(ip)                                         BSOMetaOptimizer.optimizeGrammar(
+                                                                                ['Grammar', n, sn, r].concat rs
+                                                                            )
+
+### MetaCoffeeParser
+
+ometa MetaCoffeeParser extends BSDentParser
+  ometa :first  = (&{first} | '\n') inspace*:ss prepend(ss) 
+                  OMetaParser2.grammar:g                    -> ['OMeta', ss.join(''), g]
+  coffee      = anything:x (!ometa(no) anything)*:xs        -> ['CoffeeScript', x + xs.join '']
+  topElement  = ( (ometa(yes) | coffee):x 
+                  (ometa(no)  | coffee)*:xs )?              -> [x].concat xs
+
+ometa MetaCoffeeTranslator
+  trans = ([:t apply(t):ans] -> ans)*:xs {log xs.join('')}-> BSCoffeeScriptCompiler.compile xs.join(''), bare:true
+  CoffeeScript :t
+  OMeta      :ss :t BSOMetaTranslator.trans(t):js -> '\n' + ss + '`' + js + '`\n'
