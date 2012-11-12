@@ -9,7 +9,7 @@ BSDentParser = OMeta.interpreters.BSDentParser;
 BSCSParser=subclass(OMeta,{
 "action":function(){var input,args,compiled;return (function(){input=this._apply("anything");args=this._apply("anything");compiled=this._applyWithArgs("compile",input,args);return this._or((function(){return this._applyWithArgs("simplify",compiled)}),(function(){return compiled}))}).call(this)},
 "simpleExp":function(){var input,args,compiled;return (function(){input=this._apply("anything");args=this._apply("anything");compiled=this._applyWithArgs("compile",input,args);return this._applyWithArgs("simplify",compiled)}).call(this)},
-"compile":function(){var input,args;return (function(){input=this._apply("anything");args=this._apply("anything");return (function (){return $.trim(BSCoffeeScriptCompiler.compile((((("((" + args.join()) + ") ->\n  ") + input.replace(/\n/g,"\n  ")) + ").call(this)"),({"bare": true}))).replace(/^\(function.*?\)/,"(function()").replace(/;$/,"")}).call(this)}).call(this)},
+"compile":function(){var input,args;return (function(){input=this._apply("anything");args=this._apply("anything");return (function (){return OMLib.trim(BSCoffeeScriptCompiler.compile((((("((" + args.join()) + ") ->\n  ") + input.replace(/\n/g,"\n  ")) + ").call(this)"),({"bare": true}))).replace(/^\(function.*?\)/,"(function()").replace(/;$/,"")}).call(this)}).call(this)},
 "simplify":function(){var compiled;return (function(){compiled=this._apply("anything");return (function (){var lines=compiled.split("\n");if(((lines["length"] < (2)) || (! lines[(1)].match(/^ +return/)))){throw this["fail"]}else{undefined};(exp=lines.slice((1),(- (1))));(exp[(0)]=exp[(0)].replace(/^ +return /,""));return exp.join("\n").replace(/;$/,"")}).call(this)}).call(this)}});;
 BSSemActionParser=subclass(BSDentParser,{
 "initialize":function(){return (function(){(function (){(this["dentlevel"]=(0));return (this["sep"]="none")}).call(this);return BSDentParser._superApplyWithArgs(this,'initialize')}).call(this)},
@@ -29,10 +29,10 @@ BSSemActionParser=subclass(BSDentParser,{
 "simpleExp":function(){var args,t;return (function(){args=this._apply("anything");this._apply("spaces");(this["sep"]="comma");t=this._applyWithArgs("text",false);return this._applyWithArgs("foreign",BSCSParser,'simpleExp',t,args)}).call(this)},
 "delimSemAction":function(){var args,e;return (function(){args=this._apply("anything");this._apply("spaces");e=this._applyWithArgs("between","{","}");return this._applyWithArgs("foreign",BSCSParser,'action',e,args)}).call(this)},
 "semAction":function(){var p,args,e;return (function(){p=this._apply("anything");args=this._apply("anything");(this["dentlevel"]=p);return this._or((function(){return this._apply("delimSemAction")}),(function(){return (function(){e=this._applyWithArgs("exp",p);return this._applyWithArgs("foreign",BSCSParser,'action',e,args)}).call(this)}))}).call(this)}});;
-  
+
   api = {
     BSSemActionParser: BSSemActionParser
   }
-  $.extend(OMeta.interpreters, api);
-  return api;  
+  OMLib.extend(OMeta.interpreters, api);
+  return api;
 });

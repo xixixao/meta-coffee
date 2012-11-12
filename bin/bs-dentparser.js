@@ -25,6 +25,6 @@ BSDentParser=subclass(OMeta,{
   api = {
     BSDentParser:        BSDentParser
   }
-  $.extend(OMeta.interpreters, api);
+  OMLib.extend(OMeta.interpreters, api);
   return api;
 });

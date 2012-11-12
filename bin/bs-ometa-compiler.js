@@ -15,9 +15,6 @@ BSDentParser = OMeta.interpreters.BSDentParser;
 BSSemActionParser = OMeta.interpreters.BSSemActionParser;
 BSOMetaOptimizer = OMeta.interpreters.BSOMetaOptimizer;
 
-console.log("BSSemActionParser" + OMeta.interpreters.BSSemActionParser);
-console.log("BSOMetaOptimizer" + OMeta.interpreters.BSOMetaOptimizer);
-
 BSOMetaParser=subclass(BSDentParser,{
 "lineComment":function(){return this._applyWithArgs("fromTo",'# ','\n')},
 "blockComment":function(){return this._applyWithArgs("fromTo",'#>','<#')},
@@ -89,6 +86,6 @@ BSOMetaTranslator=subclass(OMeta,{
     BSOMetaParser:     BSOMetaParser,
     BSOMetaTranslator: BSOMetaTranslator    
   }
-  $.extend(OMeta.interpreters, api);
+  OMLib.extend(OMeta.interpreters, api);
   return api;
 });

@@ -26,6 +26,6 @@ BSMetaCoffeeTranslator=subclass(OMeta,{
     BSMetaCoffeeParser: BSMetaCoffeeParser,
     BSMetaCoffeeTranslator: BSMetaCoffeeTranslator
   }
-  $.extend(OMeta.interpreters, api);
+  OMLib.extend(OMeta.interpreters, api);
   return api;
 });

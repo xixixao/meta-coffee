@@ -3,7 +3,7 @@ define ->
   # Sting Buffering
   # ---------------
 
-  # Try to use StringBuffer instead of string concatenation to improve 
+  # Try to use StringBuffer instead of string concatenation to improve
   # performance.
 
   # Adds strings into internal array and concatinates only on
@@ -13,14 +13,14 @@ define ->
       @strings = []
       for arg in arguments
         @nextPutAll arg
-  
-    nextPutAll: (s) -> 
+
+    nextPutAll: (s) ->
       @strings.push(s)
 
-    contents: -> 
+    contents: ->
       @strings.join('')
 
-    @writeStream: (string) -> 
+    @writeStream: (string) ->
       new StringBuffer(string)
 
   # delegation - switched for subclassing
@@ -31,7 +31,7 @@ define ->
 #    for p of props
 #      if props.hasOwnProperty p
 #        r[p] = props[p]
-#    return r  
+#    return r
     sub = class extends x
     for own key, val of props
       sub.prototype[key] = val
@@ -66,7 +66,19 @@ define ->
       this
 
     top: ->
-      @data[-1..][0]  
+      @data[-1..][0]
+
+  trim = (str) ->
+    str = str.replace /^\s\s*/, ''
+    ws = /\s/
+    i = str.length - 1
+    --i while ws.test str.charAt i
+    str[..i]
+
+  extend = (a, b) ->
+    for own key, value of b
+      a[key] = value
+
 
   # some functional programming stuff - never used
 
@@ -75,27 +87,27 @@ define ->
   # left reduce
   #reduce = (array, z, f) ->
   #  r = z
-  #  for el in array    
+  #  for el in array
   #    r = f r, el
   #  return r
 
   #delimWith = (array, d) ->
-  #  reduce array, [], (xs, x) ->      
+  #  reduce array, [], (xs, x) ->
   #    if xs.length > 0
   #      xs.push(d)
   #    xs.push(x)
-  #    return xs    
+  #    return xs
 
   # Squeak's ReadStream, kind of
 #  class ReadStream
 #    constructor: (anArrayOrString) ->
 #      @src = anArrayOrString
-#      @pos = 0  
-#    
-#    atEnd: -> 
+#      @pos = 0
+#
+#    atEnd: ->
 #      @pos >= @src.length
-#    
-#    next: -> 
+#
+#    next: ->
 #      @src.at @pos++
 
 
@@ -107,12 +119,12 @@ define ->
     r = string
     while (r.length < len)
       r = s + r
-    return r  
+    return r
 
   escapeStringFor = new Object()
   for c in [0...128]
-    escapeStringFor[c] = String.fromCharCode(c)  
-  specials = 
+    escapeStringFor[c] = String.fromCharCode(c)
+  specials =
     "'":  "\\'"
     '"':  '\\"'
     "\\": "\\\\"
@@ -148,7 +160,7 @@ define ->
         when 'v'  then '\v'
         when 'x'  then String.fromCharCode parseInt s.substring(2, 4), 16
         when 'u'  then String.fromCharCode parseInt s.substring(2, 6), 16
-        else           s.charAt(1)      
+        else           s.charAt(1)
     else
       s
 
@@ -157,7 +169,7 @@ define ->
     for ch in string
       ws.nextPutAll escapeChar ch
     ws.nextPutAll('"')
-    return ws.contents()  
+    return ws.contents()
 
   # C-style tempnam function
 #  tempnam = (s) ->
@@ -172,3 +184,5 @@ define ->
   StringBuffer:     StringBuffer
   Set:              Set
   Stack:            Stack
+  trim:             trim
+  extend:           extend

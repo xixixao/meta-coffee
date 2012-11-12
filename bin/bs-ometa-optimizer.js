@@ -48,6 +48,6 @@ BSNullOptimization=subclass(OMeta,{
   api = {
     BSOMetaOptimizer: BSOMetaOptimizer
   }
-  $.extend(OMeta.interpreters, api);
+  OMLib.extend(OMeta.interpreters, api);
   return api;
 });
