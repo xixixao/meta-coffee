@@ -293,6 +293,8 @@ define ->
           ans.push(x.call(this))
         catch f
           if f != @fail
+            console.log "many error"
+            console.log f
             throw f
           @input = origInput
           break
@@ -482,6 +484,10 @@ define ->
           @_apply("char")
         @_applyWithArgs("seq", y)
 
+    prepend: (xs) ->
+      for i in [xs.length-1..0] by -1
+        @_prependInput xs[i]
+
     initialize: ->
 
     # match and matchAll are a grammar's "public interface"
@@ -504,6 +510,7 @@ define ->
               input = input.tl
             input.idx--
           return matchFailed(m, input.idx)
+        console.log "special error" + f
         throw f
 
     @match: (obj, rule, args, matchFailed) ->
