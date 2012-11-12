@@ -23,26 +23,6 @@ define ->
     @writeStream: (string) -> 
       new StringBuffer(string)
 
-  # Prints anything onto a StringBuffer.
-  printOnto = (x, ws) ->
-    if not x?
-      ws.nextPutAll "" + x
-    else if x.constructor == Array
-      ws.nextPutAll "["
-      for elem, i in x
-        if (i > 0)
-          ws.nextPutAll ", "
-        printOnto elem, ws
-      ws.nextPutAll "]"   
-    else
-      ws.nextPutAll x.toString()  
-
-  # Makes Arrays print themselves sensibly.
-  Array.prototype.toString = ->
-    ws = StringBuffer.writeStream ""
-    printOnto this, ws
-    ws.contents()
-
   # delegation - switched for subclassing
   objectThatDelegatesTo = (x, props) ->
 #    f = ( -> )
@@ -72,6 +52,21 @@ define ->
 
     values: ->
       key for own key of @data
+
+  class Stack
+    constructor: ->
+      @data = []
+
+    push: (v) ->
+      @data.push v
+      this
+
+    pop: ->
+      @data = @data[0..-2]
+      this
+
+    top: ->
+      @data[-1..][0]  
 
   # some functional programming stuff - never used
 
@@ -175,3 +170,5 @@ define ->
   programString:    toProgramString
   subclass:         objectThatDelegatesTo
   StringBuffer:     StringBuffer
+  Set:              Set
+  Stack:            Stack
