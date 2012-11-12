@@ -1,0 +1,25 @@
+{
+  "name": "metacoffee",
+  "description": "OMetaJS in CoffeeScript for CoffeeScript",
+  "version": "1.0",
+  "homepage": "http://github.com/xixixao/ometajs",
+  "author": {
+    "name": "Michal Srb",
+    "email": "xixixao@seznam.cz",
+    "url": "http://github.com/xixixao"
+  },  
+  "main": "./node/compiler.js",
+  "bin": {
+    "r.js": "./node/compiler.js"
+  },
+  "engines": {
+    "node": ">=0.4.0"
+  },
+  "_id": "metacoffee@1.0",
+  "dependencies": {},
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "_engineSupported": true,
+  "_defaultsLoaded": true,
+  "_from": "metacoffee"
+}
