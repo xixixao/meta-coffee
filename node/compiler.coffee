@@ -28,7 +28,7 @@ require [
   BSMetaCoffeeParser = MetaCoffee.BSMetaCoffeeParser
   BSMetaCoffeeTranslator = MetaCoffee.BSMetaCoffeeTranslator
 
-  return compileSource = (sourceCode) ->
+  module.exports =  compileSource = (sourceCode) ->
     try
       tree = BSMetaCoffeeParser.matchAll(
         sourceCode, "topLevel", undefined, (m, i) ->
