@@ -415,7 +415,7 @@ Indentation rules:
                      |              name:rule args:as                      -> ['App', rule].concat(as)
       hostExpr        = SemActionParser.simpleExp(this.locals.values()):r
       closedHostExpr  = SemActionParser.delimSemAction(this.locals.values()):r
-      openHostExpr :p = SemActionParser.semAction(p, this.locals.values()):r 
+      openHostExpr :p = SemActionParser.semAction(p, this.locals.values()):r
       semAction      = closedHostExpr:x                                    -> ['Act', x]
       arrSemAction   = "->" linePos:p openHostExpr(p):x                    -> ['Act', x]
       semPred        = "&" closedHostExpr:x                                -> ['Pred', x]
@@ -539,7 +539,7 @@ Indentation rules:
                      |              name:rule args:as                      -> ['App', rule].concat as
       hostExpr        = SemActionParser.simpleExp(@locals.values()):r
       closedHostExpr  = SemActionParser.delimSemAction(@locals.values()):r
-      openHostExpr :p = SemActionParser.semAction(p, @locals.values()):r 
+      openHostExpr :p = SemActionParser.semAction(p, @locals.values()):r
       semAction      = closedHostExpr:x                                    -> ['Act', x]
       arrSemAction   = "->" linePos:p openHostExpr(p):x                    -> ['Act', x]
       semPred        = "&" closedHostExpr:x                                -> ['Pred', x]
@@ -593,10 +593,10 @@ Indentation rules:
 ### MetaCoffeeParser
 
 ometa MetaCoffeeParser extends BSDentParser
-  ometa :first  = (&{first} | '\n') inspace*:ss prepend(ss) 
+  ometa :first  = (&{first} | '\n') inspace*:ss prepend(ss)
                   OMetaParser2.grammar:g                    -> ['OMeta', ss.join(''), g]
   coffee      = anything:x (!ometa(no) anything)*:xs        -> ['CoffeeScript', x + xs.join '']
-  topElement  = ( (ometa(yes) | coffee):x 
+  topElement  = ( (ometa(yes) | coffee):x
                   (ometa(no)  | coffee)*:xs )?              -> [x].concat xs
 
 ometa MetaCoffeeTranslator
