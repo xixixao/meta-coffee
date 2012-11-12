@@ -1,4 +1,4 @@
-define ->    
+define ->
 
   ###
     new syntax:
@@ -13,7 +13,7 @@ define ->
   ###
 
   ###
-  ometa M 
+  ometa M
     number = number:n digit:d -> n * 10 + d.digitValue()
            | digit:d          -> d.digitValue()
 
@@ -24,7 +24,7 @@ define ->
       @_or ->
         n = @_apply("number")
         d = @_apply("digit")
-        n * 10 + d.digitValue()    
+        n * 10 + d.digitValue()
       , ->
         d = @_apply("digit")
         d.digitValue()
@@ -38,10 +38,10 @@ define ->
   # Some reflexive stuff
 
   isImmutable = (x) ->
-     x == null || x == undefined || 
+     x == null || x == undefined ||
      typeof x == "boolean" || typeof x == "number" || typeof x == "string"
 
-  stringDigitValue = (string) -> 
+  stringDigitValue = (string) ->
     string.charCodeAt(0) - "0".charCodeAt(0)
 
   isSequenceable = (x) ->
@@ -55,12 +55,12 @@ define ->
         x
       switch typeof x
         when "boolean"
-          if x == true then "Btrue" 
+          if x == true then "Btrue"
           else              "Bfalse"
         when "string"  then "S" + x
         when "number"  then "N" + x
         else
-          if x.hasOwnProperty "_id_" then x._id_ 
+          if x.hasOwnProperty "_id_" then x._id_
           else                            x._id_ = "R" + numIdx++
 
   # streams and memoization
@@ -77,8 +77,8 @@ define ->
       curr = this
       while curr != that
         r.push curr.head()
-        curr = curr.tail()    
-      if @type() is String then r.join '' else r  
+        curr = curr.tail()
+      if @type() is String then r.join '' else r
 
   class OMInputStreamEnd extends OMInputStream
     constructor: (@lst, @idx) ->
@@ -106,15 +106,15 @@ define ->
     f.prototype = x
     r = new f
     for own key, val of props
-      r[key] = val        
+      r[key] = val
     r
 
-  makeOMInputStreamProxy = (target) ->  
+  makeOMInputStreamProxy = (target) ->
     objectThatDelegatesTo target,
       memo:   {},
       target: target,
       tl: undefined,
-      tail: -> @tl || @tl = makeOMInputStreamProxy target.tail()  
+      tail: -> @tl || @tl = makeOMInputStreamProxy target.tail()
 
   # Failer (i.e., that which makes things fail) is used to detect (direct)
   # left recursion and memoize failures
@@ -124,12 +124,13 @@ define ->
 
   # the OMeta "class" and basic functionality
   class OMeta
-  
+
     # failure exception
-    fail: toString: -> "match failed"    
+    fail: toString: -> "match failed"
 
     # input is OMListInputStream
     constructor: (@input) ->
+      @initialize()
 
     _apply: (rule) ->
       memoRec = @input.memo[rule]
@@ -151,39 +152,39 @@ define ->
               if @input == sentinel
                 throw @fail
               memoRec.ans       = ans
-              memoRec.nextInput = @input          
+              memoRec.nextInput = @input
             catch f
               if f != @fail
                 throw f
-              break                  
+              break
       else if memoRec instanceof Failer
         memoRec.used = true
-        throw @fail    
+        throw @fail
       @input = memoRec.nextInput
-      return memoRec.ans  
+      return memoRec.ans
 
     # note: _applyWithArgs and _superApplyWithArgs are not memoized, so they can't be left-recursive
     _applyWithArgs: (rule, args...) ->
       ruleFn = this[rule]
       unless ruleFn?
-          throw 'tried to apply undefined rule "' + rule + '"'
+          throw 'tried to apply undefined super rule "' + rule + '"'
       ruleFnArity = ruleFn.length
       # prepend "extra" arguments in reverse order
       for idx in [args.length - 1..ruleFnArity] by -1
-        @_prependInput args[idx]        
+        @_prependInput args[idx]
       if ruleFnArity == 0
         ruleFn.call(this)
       else
         ruleFn.apply this, args[..ruleFnArity]
-    
+
     @_superApplyWithArgs: (recv, rule, args...) ->
       ruleFn = @prototype[rule]
       unless ruleFn?
-          throw 'tried to apply undefined rule "' + rule + '"'
+          throw 'tried to apply undefined super rule "' + rule + '"'
       ruleFnArity = ruleFn.length
       # prepend "extra" arguments in reverse order
-      for idx in [args.length - 1...ruleFnArity] by -1      
-        recv._prependInput(args[idx])        
+      for idx in [args.length - 1...ruleFnArity] by -1
+        recv._prependInput(args[idx])
       if ruleFnArity == 0
         ruleFn.call(recv)
       else
@@ -201,15 +202,15 @@ define ->
           if !newInput
             newInput = new OMInputStream v, @input
             @input[getTag v] = newInput
-        else 
+        else
           newInput = new OMInputStream v, @input
-        @input = newInput    
-      
+        @input = newInput
+
       @_applyWithArgs = (rule) ->
         ruleFn = this[rule]
         ruleFnArity = ruleFn.length
         # prepend "extra" arguments in reverse order
-        for idx in [args.length - 1..ruleFnArity] by -1        
+        for idx in [args.length - 1..ruleFnArity] by -1
           @_prependInput arguments[idx]
         if ruleFnArity == 0
           @_apply(rule)
@@ -220,7 +221,7 @@ define ->
       if b
         return true
       throw @fail
-    
+
     _not: (x) ->
       origInput = @input
       try
@@ -229,61 +230,61 @@ define ->
         if f != @fail
           throw f
         @input = origInput
-        return true      
+        return true
       throw @fail
-    
+
     _lookahead: (x) ->
       origInput = @input
       r         = x.call(this)
       @input = origInput
       return r
-    
+
     _or: ->
       origInput = @input
       for arg in arguments
-        try 
+        try
           @input = origInput
           return arg.call(this)
         catch f
           if f != @fail
-            throw f      
+            throw f
       throw @fail
-    
+
     _xor: (ruleName) ->
       origInput = @input
       idx = 1
       newInput = ans = null
       while idx < arguments.length
-        try 
+        try
           @input = origInput
           ans = arguments[idx].call(this)
           if newInput
             throw 'more than one choice matched by "exclusive-OR" in ' + ruleName
-          newInput = @input      
+          newInput = @input
         catch f
           if f != @fail
-            throw f      
-        idx++    
+            throw f
+        idx++
       if newInput
         @input = newInput
-        return ans    
+        return ans
       else
         throw @fail
-    
+
     disableXORs: ->
       @_xor = @_or
-    
+
     _opt: (x) ->
       origInput = @input
       ans = undefined
-      try 
+      try
         ans = x.call(this)
       catch f
         if f != @fail
           throw f
-        @input = origInput    
+        @input = origInput
       return ans
-    
+
     _many: (x) ->
       ans = if arguments[1] != undefined then [arguments[1]] else []
       loop
@@ -296,8 +297,8 @@ define ->
           @input = origInput
           break
       return ans
-    
-    _many1: (x) -> 
+
+    _many1: (x) ->
       @_many(x, x.call(this))
 
     _form: (x) ->
@@ -310,19 +311,19 @@ define ->
       @_apply("end")
       @input = origInput
       return v
-    
+
     _consumedBy: (x) ->
       origInput = @input
       x.call(this)
       return origInput.upTo(@input)
-    
+
     _idxConsumedBy: (x) ->
       origInput = @input
-      x.call(this)    
+      x.call(this)
       return [origInput.idx, @input.idx]
-    
+
     # (mode1, part1, mode2, part2 ..., moden, partn)
-    _interleave: (mode1, part1, mode2, part2) -> 
+    _interleave: (mode1, part1, mode2, part2) ->
       currInput = @input
       ans = []
       for arg, idx in arguments by 2
@@ -339,21 +340,21 @@ define ->
                 when "+" then ans[idx / 2].push(arguments[idx + 1].call(this)); arguments[idx] = "*"
                 when "?" then ans[idx / 2] =    arguments[idx + 1].call(this);  arguments[idx] = "0"
                 when "1" then ans[idx / 2] =    arguments[idx + 1].call(this);  arguments[idx] = "0"
-                else throw "invalid mode '" + arguments[idx] + "' in OMeta._interleave"            
+                else throw "invalid mode '" + arguments[idx] + "' in OMeta._interleave"
               currInput = @input
-              break          
+              break
             catch f
               if f != @fail
                 throw f
               # if this (failed) part's mode is "1" or "+", we're not done yet
-              allDone = allDone && (arguments[idx] == "*" || arguments[idx] == "?")          
-          idx += 2      
+              allDone = allDone && (arguments[idx] == "*" || arguments[idx] == "?")
+          idx += 2
         if idx == arguments.length
           if allDone
             return ans
           else
-            throw @fail      
-      
+            throw @fail
+
     _currIdx: -> @input.idx
 
 
@@ -362,124 +363,124 @@ define ->
       r = @input.head()
       @input = @.input.tail()
       r
-    
+
     end: ->
       @._not -> @._apply("anything")
-    
+
     pos: ->
       @.input.idx
-    
-    empty: -> true 
+
+    empty: -> true
 
     apply: (r) ->
       @._apply(r)
-    
+
     foreign: (g, r) ->
       gi  = new g makeOMInputStreamProxy @.input
       ans = gi._apply(r)
       @.input = gi.input.target
       ans
-    
+
     # some useful "derived" rules
     exactly: (wanted) ->
       if wanted == @_apply("anything")
         return wanted
       throw @fail
-    
+
     true: ->
       r = @_apply("anything")
       @_pred(r == true)
       r
-    
+
     false: ->
       r = @_apply("anything")
       @_pred(r == false)
       r
-    
+
     undefined: ->
       r = @_apply("anything")
       @_pred(r == undefined)
       r
-    
+
     number: ->
       r = @_apply("anything")
       @_pred(typeof r == "number")
       r
-    
+
     string: ->
       r = @_apply("anything")
       @_pred(typeof r == "string")
       r
-    
+
     char: ->
       r = @_apply("anything")
       @_pred(typeof r == "string" && r.length == 1)
       r
-    
+
     space: ->
       r = @_apply("char")
       @_pred(r.charCodeAt(0) <= 32)
       r
-    
+
     spaces: ->
       @_many -> @_apply("space")
-    
+
     digit: ->
       r = @_apply("char")
       @_pred(r >= "0" && r <= "9")
       r
-    
+
     lower: ->
       r = @_apply("char")
       @_pred(r >= "a" && r <= "z")
       r
-    
+
     upper: ->
       r = @_apply("char")
       @_pred(r >= "A" && r <= "Z")
       r
-    
+
     letter: ->
-      @_or (-> @_apply("lower")), 
+      @_or (-> @_apply("lower")),
                (-> @_apply("upper"))
-    
+
     letterOrDigit: ->
       @_or (-> @_apply("letter")),
                (-> @_apply("digit"))
-    
+
     firstAndRest: (first, rest) ->
         @_many (-> @_apply(rest)), @_apply(first)
-    
+
     seq: (xs) ->
       for x in xs
         @_applyWithArgs("exactly", x)
       xs
-    
+
     notLast: (rule) ->
       r = @_apply(rule)
       @_lookahead -> @_apply(rule)
       return r
-    
+
     listOf: (rule, delim) ->
       @_or ->
         r = @_apply(rule)
         @_many ->
           @_applyWithArgs("token", delim)
           @_apply(rule)
-        , r                    
+        , r
       , -> []
 
     token: (cs) ->
       @_apply("spaces")
       @_applyWithArgs("seq", cs)
-    
+
     fromTo: (x, y) ->
       @_consumedBy ->
         @_applyWithArgs("seq", x)
         @_many ->
           @_not -> @_applyWithArgs("seq", y)
-          @_apply("char")        
-        @_applyWithArgs("seq", y)      
+          @_apply("char")
+        @_applyWithArgs("seq", y)
 
     initialize: ->
 
@@ -487,14 +488,13 @@ define ->
     @_genericMatch: (input, rule, args, matchFailed) ->
       args ?= []
       realArgs = [rule]
-      for arg in args    
+      for arg in args
         realArgs.push(arg)
       m = new this input
-      m.initialize()
-      try 
+      try
         return if realArgs.length == 1
-          m._apply.call(m, realArgs[0]) 
-        else 
+          m._apply.call(m, realArgs[0])
+        else
           m._applyWithArgs.apply(m, realArgs)
       catch f
         if f == @prototype.fail && matchFailed?
@@ -502,24 +502,23 @@ define ->
           if input.idx?
             while input.tl? && input.tl.idx?
               input = input.tl
-            input.idx--        
-          return matchFailed(m, input.idx)      
+            input.idx--
+          return matchFailed(m, input.idx)
         throw f
-    
+
     @match: (obj, rule, args, matchFailed) ->
       @_genericMatch ListOMInputStream.toStream([obj]),    rule, args, matchFailed
-    
+
     @matchAll: (listyObj, rule, args, matchFailed) ->
-      @_genericMatch ListOMInputStream.toStream(listyObj), rule, args, matchFailed  
-    
+      @_genericMatch ListOMInputStream.toStream(listyObj), rule, args, matchFailed
+
     @interpreters: {}
 
     #createInstance: ->
     #  m = extendWith this
-    #  m.initialize()
     #  m.matchAll = (listyObj, aRule) ->
     #    @input = listyObj.toOMInputStream()
-    #    @_apply(aRule)    
+    #    @_apply(aRule)
     #  m
 
   return OMeta
