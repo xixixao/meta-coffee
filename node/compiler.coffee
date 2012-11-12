@@ -15,14 +15,11 @@ requirejs.config
 
     paths:
       cs:              '../lib/requirejs/cs'
-      'coffee-script': '../lib/cs/coffee-script-iced'
+      'coffee-script': '../lib/cs/coffee-script'
 
-
-
-
-require [
+requirejs [
   'cs!../src/metacoffee'
-  'cs!./ErrorHandler'
+  'cs!../workspace/ErrorHandler'
 ], (MetaCoffee, ErrorHandler) ->
 
   BSMetaCoffeeParser = MetaCoffee.BSMetaCoffeeParser
