@@ -1,7 +1,8 @@
 define([
   'cs!../src/ometa-base',
-  'cs!../src/lib'
-], function (OMeta, OMLib){
+  'cs!../src/lib',
+  '../lib/cs/compiler'
+], function (OMeta, OMLib, BSCoffeeScriptCompiler){
 subclass = OMLib.subclass;
 
 BSDentParser = OMeta.interpreters.BSDentParser;
