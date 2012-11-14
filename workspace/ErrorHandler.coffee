@@ -2,7 +2,7 @@ define ->
 
   positionAt = (string, n) ->
     result = ""
-    for i in [1...n]
+    for i in [1...n] by 1
       result += " "
     result += string
 
@@ -27,4 +27,4 @@ define ->
     lineLimit = 80
     offset = Math.max 0, pos - lineLimit
     line[offset..offset + lineLimit] + "\n" +
-    positionAt "⤴", pos - offset
+    positionAt "^", pos - offset
