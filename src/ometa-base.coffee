@@ -510,7 +510,7 @@ define ->
               input = input.tl
             input.idx--
           return matchFailed(m, input.idx)
-        console.log "special error" + f
+        console.log "Special error: " + f if matchFailed?
         throw f
 
     @match: (obj, rule, args, matchFailed) ->
