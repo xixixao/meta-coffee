@@ -17,26 +17,32 @@ requirejs.config
       cs:              '../lib/requirejs/cs'
       'coffee-script': '../lib/cs/coffee-script'
 
-requirejs [
-  'cs!../src/metacoffee'
-  'cs!../workspace/ErrorHandler'
-], (MetaCoffee, ErrorHandler) ->
+module.exports = (callback) ->
+  requirejs [
+    'cs!../src/metacoffee'
+    'cs!../workspace/ErrorHandler'
+  ], (MetaCoffee, ErrorHandler) ->
+    BSMetaCoffeeParser = MetaCoffee.OMeta.interpreters.BSMetaCoffeeParser
+    BSMetaCoffeeTranslator = MetaCoffee.OMeta.interpreters.BSMetaCoffeeTranslator
 
-  BSMetaCoffeeParser = MetaCoffee.BSMetaCoffeeParser
-  BSMetaCoffeeTranslator = MetaCoffee.BSMetaCoffeeTranslator
+    MetaCoffee.OMLib.ometaError = (m, i) ->
+      handled = ErrorHandler.handle m, i
+      "Error at line " + (handled.lineNumber + 1) + "\n" + 
+       ErrorHandler.bottomErrorArrow handled
 
-  module.exports =  compileSource = (sourceCode) ->
-    try
-      tree = BSMetaCoffeeParser.matchAll(
-        sourceCode, "topLevel", undefined, (m, i) ->
-          handled = ErrorHandler.handle(m, i)
-          throw new Error("Error at line: " + handled.lineNumber + "\n\n" +
-            ErrorHandler.bottomErrorArrow handled)
-      )
-      result = BSMetaCoffeeTranslator.matchAll(
-        tree, "trans", undefined, (m, i) ->
-        throw new Error("Translation error - please tell Alex about this!")
-      )
-    catch e
-      return e.toString()
-    return result
+    callback compileSource = (sourceCode) ->
+      try
+        tree = BSMetaCoffeeParser.matchAll(
+          sourceCode, "topLevel", undefined, (m, i) ->
+            handled = ErrorHandler.handle(m, i)
+            throw new Error("Error at line: " + handled.lineNumber + "\n\n" +
+              ErrorHandler.bottomErrorArrow handled)
+        )
+        result = BSMetaCoffeeTranslator.matchAll(
+          tree, "trans", undefined, (m, i) ->
+            throw new Error("Translation error - please tell Alex about this!")
+        )
+      catch e
+        message = e.toString() ? e
+        throw message
+      return [MetaCoffee.OMeta, MetaCoffee.OMLib, result]
