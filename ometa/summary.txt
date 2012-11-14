@@ -596,8 +596,9 @@ ometa MetaCoffeeParser extends BSDentParser
   ometa :first  = (&{first} | '\n') inspace*:ss prepend(ss)
                   OMetaParser2.grammar:g                    -> ['OMeta', ss.join(''), g]
   coffee      = anything:x (!ometa(no) anything)*:xs        -> ['CoffeeScript', x + xs.join '']
-  topElement  = ( (ometa(yes) | coffee):x
-                  (ometa(no)  | coffee)*:xs )?              -> [x].concat xs
+  topLevel    = (blankLine* ometa(yes) | coffee):x 
+                           (ometa(no)  | coffee)*:xs        -> [x].concat xs
+              | end                                         -> [['CoffeeScript', '']]
 
 ometa MetaCoffeeTranslator
   trans = ([:t apply(t):ans] -> ans)*:xs {log xs.join('')}-> BSCoffeeScriptCompiler.compile xs.join(''), bare:true
