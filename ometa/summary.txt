@@ -476,7 +476,7 @@ Indentation rules:
       action :input :args    = compile(input, args):compiled (simplify(compiled) | -> compiled)
       simpleExp :input :args = compile(input, args):compiled simplify(compiled)
       compile :input :args  -> $.trim(BSCoffeeScriptCompiler.compile("((" + args.join() + ") ->\n  " +
-                                           input.replace(/\n/g, '\n  ') + ").call(this)", {bare:true})).replace(/^\(function.*?\)/, '(function()').replace /;$/, ''
+                                           input.replace(/\n/g, '\n  ') + ").call(this)", {bare:true})).replace(/^\s*(var[^]*?)?(\(function[^]*?\{)([^]*)/, "(function(){$1$3").replace /;$/, ''
       simplify :compiled ->  lines = compiled.split('\n')
                              if lines.length < 2 || !lines[1].match(/^ +return/)
                                throw @fail
@@ -501,6 +501,7 @@ Indentation rules:
       text2 :inside  = fromTo('###', '###')
                      | fromTo('"', '"')
                      | fromTo('\'', '\'')
+                     | <'/' (seq('\\\\') | seq('\\') '/' | !exactly('\n') !'/' char)+ '/'>
                      | &{inside} !delims text3
                      | !exactly('\n') !delims !apply(@sep) anything
                      | pair
