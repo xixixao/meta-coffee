@@ -1,0 +1,14 @@
+#!/usr/bin/env node
+
+var path        = require('path');
+var fs          = require('fs');
+var metacoffee  = require(path.join(path.dirname(fs.realpathSync(__filename)), './compiler'));
+
+metacoffee(function (ometa) {
+  var targetDirectory = process.argv[2];
+  var fileName = process.argv[3];
+  var targetFileName = path.basename(fileName, '.metacoffee');
+  partSource = fs.readFileSync(fileName, "utf-8");
+  compiled = ometa.compileSource(partSource);
+  fs.writeFileSync(targetDirectory + "/" + targetFileName + ".js", compiled, "utf-8");
+});

@@ -25,24 +25,26 @@ module.exports = (callback) ->
     BSMetaCoffeeParser = MetaCoffee.OMeta.interpreters.BSMetaCoffeeParser
     BSMetaCoffeeTranslator = MetaCoffee.OMeta.interpreters.BSMetaCoffeeTranslator
 
-    MetaCoffee.OMLib.ometaError = (m, i) ->
-      handled = ErrorHandler.handle m, i
-      "Error at line " + (handled.lineNumber + 1) + "\n" + 
-       ErrorHandler.bottomErrorArrow handled
+    MetaCoffee.OMLib.errorHandler = ErrorHandler
 
-    callback compileSource = (sourceCode) ->
-      try
-        tree = BSMetaCoffeeParser.matchAll(
-          sourceCode, "topLevel", undefined, (m, i) ->
-            handled = ErrorHandler.handle(m, i)
-            throw new Error("Error at line: " + handled.lineNumber + "\n\n" +
-              ErrorHandler.bottomErrorArrow handled)
-        )
-        result = BSMetaCoffeeTranslator.matchAll(
-          tree, "trans", undefined, (m, i) ->
-            throw new Error("Translation error - please tell Alex about this!")
-        )
-      catch e
-        message = e.toString() ? e
-        throw message
-      return [MetaCoffee.OMeta, MetaCoffee.OMLib, result]
+    callback
+      compileSource: (sourceCode) ->
+        try
+          tree = BSMetaCoffeeParser.matchAll(
+            sourceCode, "topLevel", undefined, (m, i) ->
+              handled = ErrorHandler.handle(m, i)
+              throw new Error("Error at line: " + handled.lineNumber + "\n\n" +
+                ErrorHandler.bottomErrorArrow handled)
+          )
+          result = BSMetaCoffeeTranslator.matchAll(
+            tree, "trans", undefined, (m, i) ->
+              throw new Error("Translation error - please tell Alex about this!")
+          )
+        catch e
+          message = e.toString() ? e
+          throw message
+        return result
+      OMeta: MetaCoffee.OMeta
+      OMLib: MetaCoffee.OMLib
+
+
