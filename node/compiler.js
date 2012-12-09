@@ -15,30 +15,30 @@
 
   module.exports = function(callback) {
     return requirejs(['cs!../src/metacoffee', 'cs!../workspace/ErrorHandler'], function(MetaCoffee, ErrorHandler) {
-      var BSMetaCoffeeParser, BSMetaCoffeeTranslator, compileSource;
+      var BSMetaCoffeeParser, BSMetaCoffeeTranslator;
       BSMetaCoffeeParser = MetaCoffee.OMeta.interpreters.BSMetaCoffeeParser;
       BSMetaCoffeeTranslator = MetaCoffee.OMeta.interpreters.BSMetaCoffeeTranslator;
-      MetaCoffee.OMLib.ometaError = function(m, i) {
-        var handled;
-        handled = ErrorHandler.handle(m, i);
-        return "Error at line " + (handled.lineNumber + 1) + "\n" + ErrorHandler.bottomErrorArrow(handled);
-      };
-      return callback(compileSource = function(sourceCode) {
-        var message, result, tree, _ref;
-        try {
-          tree = BSMetaCoffeeParser.matchAll(sourceCode, "topLevel", void 0, function(m, i) {
-            var handled;
-            handled = ErrorHandler.handle(m, i);
-            throw new Error("Error at line: " + handled.lineNumber + "\n\n" + ErrorHandler.bottomErrorArrow(handled));
-          });
-          result = BSMetaCoffeeTranslator.matchAll(tree, "trans", void 0, function(m, i) {
-            throw new Error("Translation error - please tell Alex about this!");
-          });
-        } catch (e) {
-          message = (_ref = e.toString()) != null ? _ref : e;
-          throw message;
-        }
-        return [MetaCoffee.OMeta, MetaCoffee.OMLib, result];
+      MetaCoffee.OMLib.errorHandler = ErrorHandler;
+      return callback({
+        compileSource: function(sourceCode) {
+          var message, result, tree, _ref;
+          try {
+            tree = BSMetaCoffeeParser.matchAll(sourceCode, "topLevel", void 0, function(m, i) {
+              var handled;
+              handled = ErrorHandler.handle(m, i);
+              throw new Error("Error at line: " + handled.lineNumber + "\n\n" + ErrorHandler.bottomErrorArrow(handled));
+            });
+            result = BSMetaCoffeeTranslator.matchAll(tree, "trans", void 0, function(m, i) {
+              throw new Error("Translation error - please tell Alex about this!");
+            });
+          } catch (e) {
+            message = (_ref = e.toString()) != null ? _ref : e;
+            throw message;
+          }
+          return result;
+        },
+        OMeta: MetaCoffee.OMeta,
+        OMLib: MetaCoffee.OMLib
       });
     });
   };
