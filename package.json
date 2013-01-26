@@ -1,25 +1,27 @@
 {
   "name": "metacoffee",
-  "description": "OMetaJS in CoffeeScript for CoffeeScript",
-  "version": "1.0",
-  "homepage": "http://github.com/xixixao/ometajs",
-  "author": {
-    "name": "Michal Srb",
-    "email": "xixixao@seznam.cz",
-    "url": "http://github.com/xixixao"
-  },  
-  "main": "./node/compiler.js",
+  "version": "0.1.0",
+  "description": "Top-down parser generator for CoffeeScript",
+  "main": "index.js",
   "bin": {
-    "r.js": "./node/compiler.js"
+    "metacoffee": "./node/metacoffee"
   },
-  "engines": {
-    "node": ">=0.4.0"
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/xixixao/meta-coffee.git"
   },
-  "_id": "metacoffee@1.0",
-  "dependencies": {},
-  "devDependencies": {},
-  "optionalDependencies": {},
-  "_engineSupported": true,
-  "_defaultsLoaded": true,
-  "_from": "metacoffee"
+  "keywords": [
+    "parser",
+    "top-down",
+    "CoffeeScript",
+    "compiler",
+    "meta",
+    "whitespace"
+  ],
+  "dependencies": {
+    "requirejs": ">=2.1.4",
+    "coffee-script": ">=1.4.0"
+  },
+  "author": "xixixao",
+  "readmeFilename": "README.md"
 }
