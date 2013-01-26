@@ -1,7 +1,8 @@
 require [
-  "cs!../lib/metacoffee/loader"
-  "cs!../lib/errorhandler"
-], (MetaCoffee, ErrorHandler) ->
+  "../lib/metacoffee/loader"
+  "../lib/metacoffee/errorhandler"
+  "jquery"
+], (MetaCoffee, ErrorHandler, $) ->
 
   {BSMetaCoffeeParser, BSMetaCoffeeTranslator} = MetaCoffee
 
