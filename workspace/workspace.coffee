@@ -1,6 +1,6 @@
 require [
-  "cs!../bin/metacoffee/loader"
-  "cs!./ErrorHandler"
+  "cs!../lib/metacoffee/loader"
+  "cs!../lib/errorhandler"
 ], (MetaCoffee, ErrorHandler) ->
 
   {BSMetaCoffeeParser, BSMetaCoffeeTranslator} = MetaCoffee

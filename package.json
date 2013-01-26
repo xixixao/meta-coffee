@@ -2,9 +2,9 @@
   "name": "metacoffee",
   "version": "0.1.0",
   "description": "Top-down parser generator for CoffeeScript",
-  "main": "index.js",
+  "main": "./lib/compiler.js",
   "bin": {
-    "metacoffee": "./node/metacoffee"
+    "metacoffee": "./bin/metacoffee"
   },
   "repository": {
     "type": "git",
