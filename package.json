@@ -2,14 +2,7 @@
   "name": "metacoffee",
   "version": "0.1.0",
   "description": "Top-down parser generator for CoffeeScript",
-  "main": "./lib/compiler.js",
-  "bin": {
-    "metacoffee": "./bin/metacoffee"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/xixixao/meta-coffee.git"
-  },
+  "author": "xixixao",
   "keywords": [
     "parser",
     "top-down",
@@ -18,10 +11,20 @@
     "meta",
     "whitespace"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/xixixao/meta-coffee.git"
+  },
+  "bin": {
+    "metacoffee": "./bin/metacoffee"
+  },
+  "main": "./lib/compiler.js",
   "dependencies": {
     "requirejs": ">=2.1.4",
     "coffee-script": ">=1.4.0"
   },
-  "author": "xixixao",
-  "readmeFilename": "README.md"
+  "readmeFilename": "README.md",
+  "engines": {
+    "node": ">=0.4.0"
+  }
 }
