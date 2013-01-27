@@ -23,6 +23,7 @@ MetaCoffee.OMLib.errorHandler = ErrorHandler
 
 module.exports =
   compileSource: (sourceCode) ->
+    sourceCode = sourceCode.replace /\r\n/g, '\n'
     try
       tree = BSMetaCoffeeParser.matchAll(
         sourceCode, "topLevel", undefined, (m, i) ->
