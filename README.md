@@ -10,6 +10,22 @@ MetaCoffee is a parser that works over a stream of **anything**.
 Thanks to do this, you can not only parse text but also parse
 data structures like trees and graphs.
 
+## Installation
+
+To write code in MetaCoffee, the easiest approach is to use **npm**.
+
+    npm install -g metacoffee
+
+(Leave off the -g if you don't wish to install globally.)
+
+You can also clone this repository from github.
+
+Once installed, you can use the metacoffee command 
+(or `node_modules/metacoffee/bin/metacoffee`) to compile `.mc` files
+into `.js` files:
+
+    metacoffee dest/ src/my-parser.mc
+
 ## Some examples please!
 
 For the pattern matching part, MetaCoffee combines OMetaJS syntax
