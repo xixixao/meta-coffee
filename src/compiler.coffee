@@ -1,4 +1,5 @@
 requirejs = require 'requirejs'
+UglifyJS = require 'uglify-js'
 
 requirejs.config
     # Use node's special variable __dirname to
@@ -21,6 +22,11 @@ ErrorHandler = requirejs './errorhandler'
 
 MetaCoffee.OMLib.errorHandler = ErrorHandler
 
+compressor = UglifyJS.Compressor(
+  sequences: false
+  unused: false # We need this off for OMeta
+)
+
 module.exports =
   compileSource: (sourceCode) ->
     sourceCode = sourceCode.replace /\r\n/g, '\n'
@@ -31,13 +37,19 @@ module.exports =
           throw new Error("Error at line: " + handled.lineNumber + "\n\n" +
             ErrorHandler.bottomErrorArrow handled)
       )
-      result = BSMetaCoffeeTranslator.matchAll(
+      js = BSMetaCoffeeTranslator.matchAll(
         tree, "trans", undefined, (m, i) ->
           throw new Error("Translation error")
+      )
+      ast = UglifyJS.parse(js)
+      ast.figure_out_scope()
+      ast = ast.transform(compressor)
+      js = ast.print_to_string(
+        beautify: true
       )
     catch e
       message = e.toString() ? e
       throw message
-    return result
+    return js
   OMeta: MetaCoffee.OMeta
   OMLib: MetaCoffee.OMLib

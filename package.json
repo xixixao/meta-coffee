@@ -21,7 +21,8 @@
   "main": "./lib/compiler.js",
   "dependencies": {
     "requirejs": ">=2.1.4",
-    "coffee-script": ">=1.4.0"
+    "coffee-script": ">=1.4.0",
+    "uglify-js": ">=2.0.0"
   },
   "devDependencies": {
     "grunt": "~0.4.0",
