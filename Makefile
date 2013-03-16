@@ -29,6 +29,10 @@ $(LIBDIR)/%.js: $(SRCDIR)/%.mc $(LIBDIR)
 install:
 	npm install -g .
 
+web: build
+	node r.js -o build.js
+	cp lib/metacoffee/errorhandler.js extras/errorhandler.js
+
 loc:
 	wc -l src/*
 
