@@ -116,12 +116,6 @@ define ->
       tl: undefined,
       tail: -> @tl || @tl = makeOMInputStreamProxy target.tail()
 
-  # Failer (i.e., that which makes things fail) is used to detect (direct)
-  # left recursion and memoize failures
-
-  class Failer
-    used: false
-
   # the OMeta "class" and basic functionality
   class OMeta
 
@@ -133,17 +127,19 @@ define ->
       @initialize()
 
     _apply: (rule) ->
-      memoRec = @input.memo[rule]
+      memo = @input.memo
+      memoRec = memo[rule]
       if memoRec == undefined
         origInput = @input
-        failer    = new Failer()
         unless this[rule]?
           throw 'tried to apply undefined rule "' + rule + '"'
-        @input.memo[rule] = failer
-        @input.memo[rule] = memoRec =
+        memo[rule] = false
+        memoRec =
           ans: this[rule].call(this)
           nextInput: @input
-        if failer.used
+        failer = memo[rule]
+        memo[rule] = memoRec
+        if failer == true
           sentinel = @input
           loop
             try
@@ -157,8 +153,8 @@ define ->
               if f != @fail
                 throw f
               break
-      else if memoRec instanceof Failer
-        memoRec.used = true
+      else if typeof memoRec == 'boolean'
+        memo[rule] = true
         throw @fail
       @input = memoRec.nextInput
       return memoRec.ans
