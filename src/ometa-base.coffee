@@ -28,9 +28,6 @@ define ->
       , ->
         d = @_apply("digit")
         d.digitValue()
-      }
-     )
-    }
 
   (new M).matchAll("123456789", "number")
   ###
