@@ -22,10 +22,9 @@ ErrorHandler = requirejs './errorhandler'
 
 MetaCoffee.OMLib.errorHandler = ErrorHandler
 
-compressor = UglifyJS.Compressor(
+compressor = UglifyJS.Compressor
   sequences: false
   unused: false # We need this off for OMeta
-)
 
 module.exports =
   compileSource: (sourceCode) ->
@@ -41,12 +40,13 @@ module.exports =
         tree, "trans", undefined, (m, i) ->
           throw new Error("Translation error")
       )
-      ast = UglifyJS.parse(js)
+      ast = UglifyJS.parse js
       ast.figure_out_scope()
-      ast = ast.transform(compressor)
-      js = ast.print_to_string(
+      ast = ast.transform compressor
+      js = ast.print_to_string
         beautify: true
-      )
+        indent_level: 2
+
     catch e
       message = e.toString() ? e
       throw message
