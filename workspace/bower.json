@@ -1,0 +1,10 @@
+{
+  "name": "skeleton",
+  "version": "0.1.0",
+  "dependencies": {
+    "hyper": "0.0.3",
+    "requirejs": "2.1.8",
+    "coffee-script": "~1.6.3",
+    "js-beautify": "~1.4.2"
+  }
+}

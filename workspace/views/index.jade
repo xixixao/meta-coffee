@@ -1,0 +1,17 @@
+doctype 5
+html
+  head
+    title undefined
+    link(rel='stylesheet', href='/css/style.css' + cachebust)
+
+    if reload
+      script(src='/socket.io/socket.io.js')
+      script(src='/js/reload-client.js')
+
+    if optimize
+      script(src='/js/bootstrap-built.js')
+    else
+      script(src='/js/vendor/requirejs/require.js', data-main='/js/bootstrap.js')
+
+  body
+    #mainComponent

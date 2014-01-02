@@ -1,0 +1,12 @@
+path        = require 'path'
+fs          = require 'fs'
+MetaCoffee  = require './prettyfier'
+
+targetDirectory = process.argv[2]
+fileName = process.argv[3]
+
+code = fs.readFileSync fileName, "utf-8"
+compiled = MetaCoffee.compile code
+
+targetFileName = path.basename fileName, path.extname fileName
+fs.writeFileSync "#{targetDirectory}/#{targetFileName}.js", compiled, "utf-8"

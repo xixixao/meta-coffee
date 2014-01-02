@@ -1,7 +1,7 @@
 default: all
 
-SRCDIR         = src
-LIBDIR         = lib/metacoffee
+SRCDIR = src
+LIBDIR = lib/metacoffee
 
 all:
 	node_modules/.bin/grunt
@@ -13,9 +13,8 @@ build: all
 install:
 	npm install -g .
 
-web: build
-	node r.js -o build.js
-	cp lib/metacoffee/errorhandler.js extras/errorhandler.js
+web:
+	node_modules/.bin/grunt web
 
 loc:
 	wc -l $(SRCDIR)/*
