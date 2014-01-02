@@ -1,0 +1,13 @@
+{
+  "name": "metacoffee",
+  "version": "0.3.0",
+  "main": [
+    "extras/metacoffee.js",
+    "extras/errorhandler.js",
+    "extras/prettyfier.js"
+  ],
+  "dependencies": {
+    "coffee-script": "~1.6.3",
+    "js-beautify": "~1.4.2"
+  }
+}
