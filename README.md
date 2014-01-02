@@ -6,7 +6,7 @@ and itself. It is a rewrite and redesign of the original Alex Warth's
 
 ## What is it good for?
 
-MetaCoffee is a parser that works over a stream of **anything**. 
+MetaCoffee is a parser that works over a stream of **anything**.
 Thanks to do this, you can not only parse text but also parse
 data structures like trees and graphs.
 
@@ -20,7 +20,7 @@ To write code in MetaCoffee, the easiest approach is to use **npm**.
 
 You can also clone this repository from github.
 
-Once installed, you can use the metacoffee command 
+Once installed, you can use the metacoffee command
 (or `node_modules/metacoffee/bin/metacoffee`) to compile `.mc` files
 into `.js` files:
 
@@ -42,15 +42,15 @@ ometa MultiplicativeInterpreter
            | primExpr
   primExpr = "(" expr:x ")"           -> x
            | number
-  number   = digit:d                  -> valueOfDigit d
+  number   = "" digit:d               -> valueOfDigit d
 
 valueOfDigit = (digit) ->
   +digit
 
-console.log MultiplicativeInterpreter.matchAll '(7 * 12) / (8 / 4))', 'expr' 
+console.log MultiplicativeInterpreter.matchAll '((7 * 8) / (8 / 6))', 'expr'
 # 42
 ```
-    
+
 Yes, as in OMetaJS, MetaCoffee allows for parsers to be included anywhere in
 CoffeeScript. The second great thing about MetaCoffee is that it's
 **object-oriented**! The syntax is familiar:
@@ -63,8 +63,8 @@ ometa ArithmeticInterpreter extends MultiplicativeInterpreter
            | mulExpr
   mulExpr  = mulExpr:x "%" primExpr:y -> x % y
            | ^mulExpr
-           
-console.log ArithmeticInterpreter.matchAll '(9 + 8) / (7 % 6))', 'expr'           
+
+console.log ArithmeticInterpreter.matchAll '((9 + 8) / (7 % 6))', 'expr'
 # 17
 ```
 
@@ -76,12 +76,12 @@ to **composition**:
 ometa FruitEvaluator extends ArithmeticInterpreter
   number = FruitParser.fruit
          | ^number
-  
+
 ometa FruitParser
   fruit    = "apple" -> 14
            | ("pear" | "peach") -> 93
            | "coconut"          -> 1
-           
+
 console.log FruitEvaluator.matchAll '2 * apple + 3 * pear', 'expr'
 # Yes we can add apples and pears!
 # 307
@@ -117,7 +117,7 @@ rule
 &nbsp;&nbsp;&nbsp;&nbsp;Returns the result of recursively applying the given rule.
 
 ### Naming
-To be able to manipulate the match results of all subexpressions in given expressions, we label them with identifiers (these must be valid CoffeeScript variable identifiers). 
+To be able to manipulate the match results of all subexpressions in given expressions, we label them with identifiers (these must be valid CoffeeScript variable identifiers).
 
 ```coffee
 expression:name
@@ -154,7 +154,7 @@ The opposite of positive lookahead, succeeds when the expression would fail next
 ```coffee
 &{semanticAction}
 ```
-Runs the semantic action and succeeds if the semantic action returns **true** value. 
+Runs the semantic action and succeeds if the semantic action returns **true** value.
 ```coffee
 !{semanticAction}
 ```
@@ -172,7 +172,7 @@ This is extremely handy, for example, we can log our progress when running our g
 expression:e -> result = scramble e
                 console.log result
 # Inside curly braces
-expression:e {  
+expression:e {
   console.log e
   scramble e
 }:scr expression2 -> scr

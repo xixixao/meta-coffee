@@ -77,6 +77,7 @@ trim = (str) ->
 extend = (a, b) ->
   for own key, value of b
     a[key] = value
+  a
 
 
 # some functional programming stuff - never used

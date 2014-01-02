@@ -1,5 +1,5 @@
 OMeta = require './ometa-base'
-{subclass, trim, extend} = require './ometa-lib'
+{subclass, trim} = require './ometa-lib'
 BSCoffeeScriptCompiler = require 'coffee-script'
 
 BSDentParser = require './bs-dentparser'

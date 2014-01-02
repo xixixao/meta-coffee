@@ -1234,15 +1234,14 @@ trim = function (str) {
   return str.slice(0, +i + 1 || 9000000000);
 };
 extend = function (a, b) {
-  var key, value, _results;
-  _results = [];
+  var key, value;
   for (key in b) {
     if (!__hasProp.call(b, key))
       continue;
     value = b[key];
-    _results.push(a[key] = value);
+    a[key] = value;
   }
-  return _results;
+  return a;
 };
 padStringWith = function (string, s, len) {
   var r;
@@ -1492,9 +1491,9 @@ return module.exports;
 define('bs-semactionparser',['require', 'exports', 'module', './ometa-base', './ometa-lib', 'coffee-script', './bs-dentparser'], function (require, exports, module) {
   
 
-var BSCoffeeScriptCompiler, BSDentParser, OMeta, compileAction, extend, subclass, trim, _ref;
+var BSCoffeeScriptCompiler, BSDentParser, OMeta, compileAction, subclass, trim, _ref;
 OMeta = require("./ometa-base");
-_ref = require("./ometa-lib"), subclass = _ref.subclass, trim = _ref.trim, extend = _ref.extend;
+_ref = require("./ometa-lib"), subclass = _ref.subclass, trim = _ref.trim;
 BSCoffeeScriptCompiler = require("coffee-script");
 BSDentParser = require("./bs-dentparser");
 compileAction = function (input, args) {

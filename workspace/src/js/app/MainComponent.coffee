@@ -2,7 +2,7 @@ React = require 'React'
 {_div, _p, _h2, _textarea, _pre, _button} = require 'hyper'
 
 {runtime} = MetaCoffee = require 'metacoffee/metacoffee'
-MetaCoffee = (require 'metacoffee/prettyfier') MetaCoffee
+compiler = (require 'metacoffee/prettyfier') MetaCoffee
 
 module.exports = React.createClass
 
@@ -15,7 +15,7 @@ module.exports = React.createClass
       value: event.target.value
 
   _compile: ->
-    MetaCoffee.compile @state.value, bare: true
+    compiler.compile @state.value, bare: true
 
   translate: ->
     @setState
@@ -33,7 +33,7 @@ module.exports = React.createClass
           MetaCoffee.installRuntime window
           eval translation
         catch e
-          e.message
+          e.message ? e.toString()
 
   render: ->
     _div {},
