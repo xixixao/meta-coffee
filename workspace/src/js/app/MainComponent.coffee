@@ -30,7 +30,7 @@ module.exports = React.createClass
       result:
         try
           translation = @_compile()
-          MetaCoffee.runtime.install window
+          MetaCoffee.installRuntime window
           eval translation
         catch e
           e.message
