@@ -1,6 +1,6 @@
 path        = require 'path'
 fs          = require 'fs'
-MetaCoffee  = require './prettyfier'
+MetaCoffee  = (require './prettyfier') require './index'
 
 targetDirectory = process.argv[2]
 fileName = process.argv[3]

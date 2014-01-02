@@ -29,7 +29,7 @@ module.exports = (grunt) ->
     srcCode = grunt.file.read srcFile
 
     try
-      require('./prettyfier').compile srcCode
+      (require('./prettyfier') require('./index')).compile srcCode
     catch e
       grunt.log.error(e)
       grunt.fail.warn('MetaCoffee failed to compile.')

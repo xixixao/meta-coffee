@@ -1,8 +1,8 @@
 React = require 'React'
 {_div, _p, _h2, _textarea, _pre, _button} = require 'hyper'
 
-{runtime} = require 'metacoffee/metacoffee'
-MetaCoffee = require 'metacoffee/prettyfier'
+{runtime} = MetaCoffee = require 'metacoffee/metacoffee'
+MetaCoffee = (require 'metacoffee/prettyfier') MetaCoffee
 
 module.exports = React.createClass
 

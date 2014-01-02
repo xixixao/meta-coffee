@@ -32,7 +32,7 @@ module.exports = (grunt) ->
         dependencies: exports: root: 'errorhandler'
       prettyfier:
         template: "combined"
-        main: "index"
+        main: "prettyfier"
         path: "lib/metacoffee"
         dstPath: "extras/prettyfier.js"
         dependencies: exports: root: 'prettyfier'
