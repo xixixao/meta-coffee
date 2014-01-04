@@ -3628,7 +3628,8 @@ compileCoffeeScript = function (source, bare) {
   try {
     result = BSCoffeeScriptCompiler.compile(source, { bare: bare });
   } catch (e) {
-    throw "" + source + "\n\n" + e.toString();
+    console.log("CoffeeScript SyntaxError in\n\n" + source);
+    throw e;
   }
   return result;
 };
