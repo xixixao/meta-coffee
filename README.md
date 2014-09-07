@@ -35,6 +35,9 @@ Together with a pinch of white-space significance, this
 results in a beautiful and simple syntax:
 
 ```coffee
+# Connecting generated code to boilerplate (a bit unobvious)
+{subclass, Stack, OMeta} = require('metacoffee').runtime
+
 ometa MultiplicativeInterpreter
   expr     = mulExpr
   mulExpr  = mulExpr:x "*" primExpr:y -> x * y
