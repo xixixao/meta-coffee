@@ -267,3 +267,11 @@ listOf(what, delimeter)
 token(string)
 fromTo(left, right)
 ```
+
+### Location data
+
+The location of the input can be found in the special `at` variable.
+
+```coffee
+-> at # returns an array with two indices: [from, to]
+```
