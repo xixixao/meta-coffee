@@ -40,7 +40,7 @@ ometa BSOMetaParser extends BSDentParser
   expr5          = expr4(true):x ("|" expr4(true))+:xs                 -> ['Or',  x].concat xs
                  | expr4(true):x ("||" expr4(true))+:xs                -> ['XOr', x].concat xs
                  | expr4(false)
-  expr4 :ne      =       expr3*:xs arrSemAction:act                    -> ['And'].concat(xs).concat([act])
+  expr4 :ne      =       expr3*:xs arrSemAction:act                    -> ['And', ['Set', 'at', ['IdxConsBy', ['And'].concat(xs)]], act]
                  | &{ne} expr3+:xs                                     -> ['And'].concat xs
                  | !{ne} expr3*:xs                                     -> ['And'].concat xs
   optIter :x     = '*'                                                 -> ['Many',  x]
