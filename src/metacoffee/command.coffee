@@ -12,4 +12,4 @@ compiled = MetaCoffee.compile code
 targetFileName = path.basename fileName, path.extname fileName
 
 mkdirp.sync targetDirectory
-fs.writeFileSync (path.join targetDirectory, targetFileName), compiled, "utf-8"
+fs.writeFileSync (path.join targetDirectory, targetFileName + '.js'), compiled, "utf-8"
