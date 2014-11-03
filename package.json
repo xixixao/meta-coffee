@@ -1,6 +1,6 @@
 {
   "name": "metacoffee",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "description": "Top-down parser generator for CoffeeScript",
   "author": "xixixao",
   "keywords": [
