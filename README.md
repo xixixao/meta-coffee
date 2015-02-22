@@ -26,6 +26,15 @@ into `.js` files:
 
     metacoffee dest/ src/my-parser.mc
 
+The compiler does not include the required runtime library in the generated files, so you have to manually include it in the file (whichever way to import code you're using), for example in Node you can do:
+
+```coffee
+{runtime: {subclass, OMeta}} = require 'metacoffee'.
+
+ometa #...
+```
+
+
 ## Some examples please!
 
 For the pattern matching part, MetaCoffee combines OMetaJS syntax
@@ -275,3 +284,7 @@ The location of the input can be found in the special `at` variable.
 ```coffee
 -> at # returns an array with two indices: [from, to]
 ```
+
+## Contributing
+
+I haven't had the time to polish this tool, so PRs are more than welcome. One open issue is the inclusion of the runtime, nice solution would support AMD/NodeJS/Browserify.
