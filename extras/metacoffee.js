@@ -2559,14 +2559,14 @@ BSOMetaParser = subclass(BSDentParser, {
     var ch;
     return function () {
       ch = this._apply("anything");
-      return "0123456709abcdef".indexOf(ch.toLowerCase());
+      return "0123456789abcdef".indexOf(ch.toLowerCase());
     }.call(this);
   },
   "hexDigit": function () {
     var x, v;
     return function () {
       x = this._apply("char");
-      v = this.hexValue(x);
+      v = this._applyWithArgs("hexValue", x);
       this._pred(v >= 0);
       return v;
     }.call(this);

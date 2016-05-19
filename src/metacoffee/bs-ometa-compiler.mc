@@ -14,8 +14,8 @@ ometa BSOMetaParser extends BSDentParser
   nameFirst      = '_' | '$' | letter
   bareName       = <nameFirst (nameFirst | digit)*>
   name           = spaces bareName
-  hexValue :ch                                                         -> '0123456709abcdef'.indexOf ch.toLowerCase()
-  hexDigit       = char:x {this.hexValue(x)}:v &{v >= 0}               -> v
+  hexValue :ch                                                         -> '0123456789abcdef'.indexOf ch.toLowerCase()
+  hexDigit       = char:x hexValue(x):v &{v >= 0}                      -> v
   escapedChar    = <'\\' ( 'u' hexDigit hexDigit hexDigit hexDigit
                          | 'x' hexDigit hexDigit
                          | char                                   )>:s -> unescape s
