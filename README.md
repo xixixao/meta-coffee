@@ -29,7 +29,7 @@ into `.js` files:
 The compiler does not include the required runtime library in the generated files, so you have to manually include it in the file (whichever way to import code you're using), for example in Node you can do:
 
 ```coffee
-{runtime: {subclass, Stack, OMeta}} = require 'metacoffee'.
+{runtime: {subclass, Stack, OMeta}} = require 'metacoffee'
 
 ometa #...
 ```
