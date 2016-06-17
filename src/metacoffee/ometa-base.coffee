@@ -380,6 +380,11 @@ module.exports = class OMeta
       return wanted
     throw @fail
 
+  range: (a, z) ->
+    r = @_apply("anything")
+    @_pred(a <= r <= z)
+    r
+
   true: ->
     r = @_apply("anything")
     @_pred(r == true)
