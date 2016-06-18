@@ -23,6 +23,11 @@ ometa BSOMetaParser extends BSDentParser
   charSequence   = '"'  ( !'"' escapedChar)*:xs  '"'                   -> ['App', 'token',   programString xs.join '']
   string         = '\'' (!'\'' escapedChar)*:xs '\''                   -> ['App', 'exactly', programString xs.join '']
   number         = <'-'? digit+>:n                                     -> ['App', 'exactly', n]
+  charRange      = ( '\'' (!'\'' escapedChar:a) '\''
+                   | '"'  ( !'"' escapedChar:a)  '"'
+                   ) '.' '.'
+                   ( '\'' (!'\'' escapedChar:z) '\''
+                   | '"'  ( !'"' escapedChar:z)  '"' )                 -> ['App', 'range', programString(a), programString(z)]
   keyword :xs    = token(xs) !letterOrDigit                            -> xs
   args           = '(' listOf('hostExpr', ','):xs ")"                  -> xs
                  | empty                                               -> []
@@ -58,7 +63,7 @@ ometa BSOMetaParser extends BSDentParser
   expr1          = application
                  | ( keyword('undefined') | keyword('nil')
                    | keyword('true')      | keyword('false') ):x       -> ['App', 'exactly', x]
-                 | spaces (charSequence | string | number)
+                 | spaces (charRange | charSequence | string | number)
                  | "["  expr(0):x "]"                                  -> ['Form',      x]
                  | "<"  expr(0):x ">"                                  -> ['ConsBy',    x]
                  | "@<" expr(0):x ">"                                  -> ['IdxConsBy', x]

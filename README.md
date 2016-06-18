@@ -269,6 +269,11 @@ exactly(what)
 ```
 Compares the next thing in the input with the passed-in argument.
 ```coffee
+range('a', 'z')
+'a'..'z'
+```
+Verifies the next character's ascii code is between the two arguments
+```coffee
 firstAndRest(first, rest)
 seq(what)
 notLast(what)
