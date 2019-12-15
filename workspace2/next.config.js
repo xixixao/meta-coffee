@@ -7,4 +7,10 @@ module.exports = {
     linkPrefix: repoNameURIPrefix,
   },
   generateBuildId: async () => 'current',
+  'react-monaco-editor': require.resolve('react-monaco-editor/lib'),
+  webpack: (config, {buildId, dev, isServer, defaultLoaders, webpack}) => {
+    console.log(config);
+    config.plugins.push(new (require('monaco-editor-webpack-plugin'))({}));
+    return config;
+  },
 };
