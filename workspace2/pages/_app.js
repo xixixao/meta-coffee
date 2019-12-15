@@ -1,6 +1,6 @@
-import App from "next/app";
-import Link from "../components/FixedLink";
-import React from "react";
+import App from 'next/app';
+import Link from '../components/FixedLink';
+import React from 'react';
 
 export default class MyApp extends App {
   static async getInitialProps({ Component, router, ctx }) {
