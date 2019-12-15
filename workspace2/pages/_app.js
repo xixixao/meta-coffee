@@ -1,5 +1,5 @@
 import App from "next/app";
-import Link from "next/link";
+import Link from "../components/FixedLink";
 import React from "react";
 
 export default class MyApp extends App {
@@ -19,15 +19,15 @@ export default class MyApp extends App {
       <>
         <header>
           <nav>
-            <Link href="/meta-coffee">
+            <Link href="/">
               <a>Home</a>
             </Link>
             |
-            <Link href="/meta-coffee/about">
+            <Link href="/about">
               <a>About</a>
             </Link>
             |
-            <Link href="/meta-coffe/contact">
+            <Link href="/contact">
               <a>Contact</a>
             </Link>
           </nav>
