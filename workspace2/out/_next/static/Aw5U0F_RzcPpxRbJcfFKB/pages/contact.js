@@ -1,1 +1,0 @@
-(window.webpackJsonp=window.webpackJsonp||[]).push([[5],{ALdH:function(n,t,o){"use strict";o.r(t);var c=o("q1tI"),u=o.n(c),e=o("F1wk"),i=u.a.createElement;t.default=function(){return i(e.a,{title:"Contact us"},i("div",null,"Contact"))}},lqnA:function(n,t,o){(window.__NEXT_P=window.__NEXT_P||[]).push(["/contact",function(){return o("ALdH")}])}},[["lqnA",0,1]]]);
