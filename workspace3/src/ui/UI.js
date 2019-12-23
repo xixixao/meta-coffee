@@ -3,14 +3,24 @@ import * as React from 'react';
 import {forwardRef, useRef, useEffect, useState} from 'react';
 import MonacoEditor from 'react-monaco-editor';
 
+const EditorConfig = (props: {|
+  defaultValue?: string,
+  language?: string,
+  name: string,
+|}) => null;
+export const Editor = EditorConfig;
+
 function App(props: {
+  children: Array<React.Element<typeof EditorConfig>>,
   translate: string => Promise<string>,
-  run: ({code: string, input: string}) => Promise<string>,
+  run: string => Promise<string>,
 }): React.Node {
-  const [code, setCode] = useState('');
-  const [translation, setTranslation] = useState('');
-  const [input, setInput] = useState('');
-  const [result, setResult] = useState('');
+  const [codeEditor, translationEditor, resultEditor] = props.children;
+  const [code, setCode] = useState(codeEditor.props.defaultValue ?? '');
+  const [translation, setTranslation] = useState(
+    translationEditor.props.defaultValue ?? '',
+  );
+  const [result, setResult] = useState(resultEditor.props.defaultValue ?? '');
   const {translate, run} = props;
   useEffect(() => {
     (async () => {
@@ -19,20 +29,59 @@ function App(props: {
   }, [code, setTranslation, translate]);
   useEffect(() => {
     (async () => {
-      setResult(await run({code: translation, input}));
+      setResult(await run(translation));
     })();
-  }, [translation, input, setResult, run]);
+  }, [translation, setResult, run]);
   return (
-    <Column>
-      <Row size={3}>
-        <ResizingEditor onChange={setCode} value={code} />
-        <ResizingEditor options={{readOnly: true}} value={translation} />
-      </Row>
-      <Row size={1}>
-        <ResizingEditor onChange={setInput} value={input} />
-        <ResizingEditor options={{readOnly: true}} value={result} />
-      </Row>
+    <Row>
+      <LayoutChild>
+        <EditorWithLabel
+          onChange={setCode}
+          value={code}
+          {...codeEditor.props}
+        />
+      </LayoutChild>
+      <Column>
+        <LayoutChild size={3}>
+          <EditorWithLabel
+            options={{readOnly: true}}
+            value={translation}
+            {...translationEditor.props}
+          />
+        </LayoutChild>
+        <LayoutChild size={1}>
+          <EditorWithLabel
+            options={{readOnly: true}}
+            size={1}
+            value={result}
+            {...resultEditor.props}
+          />
+        </LayoutChild>
+      </Column>
+    </Row>
+  );
+}
+
+const EditorWithLabel = forwardRef((props, ref) => {
+  const {name, ...otherProps} = props;
+  return (
+    <Column style={{border: '1px solid black'}}>
+      <EditorLabel>{props.name}</EditorLabel>
+      <ResizingEditor ref={ref} {...otherProps} />
     </Column>
+  );
+});
+
+function EditorLabel(props) {
+  return (
+    <div
+      style={{
+        background: '#666',
+        color: 'white',
+        padding: 4,
+      }}>
+      {props.children}
+    </div>
   );
 }
 
@@ -43,6 +92,7 @@ const ResizingEditor = forwardRef((props, ref: any) => {
     editorRef.current.editor.layout();
   });
   const {options = {}, ...otherProps} = props;
+  // return <div style={{width: 500}} />;
   return (
     <MonacoEditor
       ref={editorRef}
@@ -50,6 +100,7 @@ const ResizingEditor = forwardRef((props, ref: any) => {
       options={{
         fontSize: '14px',
         fontFamily: 'Monaco, Menlo',
+        minimap: {enabled: false},
         ...options,
       }}
       theme="vs-dark"
@@ -65,41 +116,64 @@ function useWindowResize(callback: () => void): void {
   });
 }
 
-type ContainerComponent = (props: {
-  children: React.ChildrenArray<React.Element<any>>,
+type LayoutComponent = (props: {
+  children: React.Node,
+  style?: $Shape<CSSStyleDeclaration>,
   size?: number,
 }) => React.Node;
 
-function createContainerComponent(
-  direction: 'row' | 'column',
-): ContainerComponent {
-  function isLayoutElement(child: React.Element<any>) {
-    return child.type.isLayout;
-  }
-  const component = props => {
+function createLayoutComponent(): LayoutComponent {
+  return props => {
     return (
       <div
         style={{
+          ...props.style,
           display: 'flex',
-          flexDirection: direction,
           flex: props.size ?? 1,
-          // justifyContent: 'space-between',
         }}>
-        {React.Children.map(props.children, child =>
-          isLayoutElement(child) ? child : <div style={{flex: 1}}>{child}</div>,
-        )}
+        {props.children}
       </div>
     );
   };
-  component.isLayout = true;
-  function capitalize(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-  }
-  component.displayName = capitalize(direction);
-  return component;
 }
 
-const Row = createContainerComponent('row');
-const Column = createContainerComponent('column');
+type LayoutProps = {|
+  style?: $Shape<CSSStyleDeclaration>,
+  size?: number,
+|};
+
+type ContainerProps = {|
+  ...LayoutProps,
+  children: React.ChildrenArray<React.Element<any>>,
+|};
+
+function Row(props: ContainerProps) {
+  return (
+    <div style={{...layoutProps(props), flexDirection: 'row'}}>
+      {props.children}
+    </div>
+  );
+}
+
+function Column(props: ContainerProps) {
+  return (
+    <div style={{...layoutProps(props), flexDirection: 'column'}}>
+      {props.children}
+    </div>
+  );
+}
+
+function LayoutChild(props: {|...LayoutProps, children: React.Node|}) {
+  return <div style={layoutProps(props)}>{props.children}</div>;
+}
+
+function layoutProps(props: {...LayoutProps}) {
+  return {
+    ...props.style,
+    display: 'flex',
+    overflow: 'auto',
+    flex: props.size ?? 1,
+  };
+}
 
 export default App;
